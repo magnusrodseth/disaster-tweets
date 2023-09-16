@@ -471,6 +471,7 @@ werkzeug=2.2.3=py311hecd8cb5_0
 whatthepatch=1.0.2=py311hecd8cb5_0
 wheel=0.38.4=py311hecd8cb5_0
 widgetsnbextension=4.0.5=py311hecd8cb5_0
+wordcloud=1.9.2=pypi_0
 wrapt=1.14.1=py311h6c40b1e_0
 wurlitzer=3.0.2=py311hecd8cb5_0
 xarray=2023.6.0=py311hecd8cb5_0
