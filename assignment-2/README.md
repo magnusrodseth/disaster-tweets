@@ -20,6 +20,12 @@ Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Hembre, Max 
 
 ...
 
+- Linear regression
+- Polynomial regression
+- Jeg tror logistic regression passer oss godt her, etter vi har fjernet outliers.
+- Passer det med random forest her, som basic modelling method nummer 2?
+- Andre relevante basic modelling methods inkluderer Naive Bayes og Support Vector Machines.
+
 ### 4.2 With hyperparameter tuning
 
 ...
@@ -41,6 +47,15 @@ Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Hembre, Max 
 ## 6. Designing a pipeline
 
 > Based on one advanced modelling technique. Justify choices.
+
+- Ensamble learning
+  - Max voting (generally used for classification problems)
+  - Average (Can be used for making predictions in regression problems, or while calculating probabilities for classification problems)
+- Stacking
+- Blending
+- Bagging
+  - Random forest telles her som en advanced modelling technique, så kanskje vi ikke skal ha den med på basic.
+- Boosting
 
 ## 7. Individual contributions
 
