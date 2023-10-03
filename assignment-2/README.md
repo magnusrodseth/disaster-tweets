@@ -21,6 +21,7 @@ Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Hembre, Max 
 ...
 
 - Linear regression
+- Logistic regression
 - Polynomial regression
 - Jeg tror logistic regression passer oss godt her, etter vi har fjernet outliers.
 - Passer det med random forest her, som basic modelling method nummer 2?
