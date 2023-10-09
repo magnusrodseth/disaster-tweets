@@ -353,6 +353,7 @@ pyqt5-sip=12.11.0=py311hcec6c5f_0
 pyqtwebengine=5.15.7=py311hcec6c5f_0
 pyrsistent=0.18.0=py311h6c40b1e_0
 pysocks=1.7.1=py311hecd8cb5_0
+pyspellchecker=0.7.2=pyhd8ed1ab_0
 pytables=3.8.0=py311hbdc8ef1_2
 pytest=7.4.0=py311hecd8cb5_0
 python=3.11.4=h1fd4e5f_0
