@@ -4,7 +4,15 @@ Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Hembre, Max 
 
 ## 1. Implement the preprocessing
 
-...
+We started by removing features, according to what was outlined in assignment 1. Next, we removed rows with a confidence threshold below `1.0`.
+
+Next, we preprocessed the textual data. We cleaned up the `keyword` column, ensuring that all keywords were lower case, and that all keywords were separated by a single space. For comparison, some keywords were on the format `airplane%20accident`, which should be `airplane accident`.
+
+Furthermore, we cleaned the `text` column. The first part of this included removing links, line breaks, extra spaces, special characters and punctuation. Next, we removed English stopwords. Finally, we lemmatized the text.
+
+When handling categorical data, we removed rows with a `choose_one` value of `Can't decide`, according to what was outlined in assignment 1. Next, we mapped the `choose_one` values `Relevant` and `Not Relevant` to `1` and `0`, respectively. This was stored in a new feature, called `target`.
+
+Moreover, we removed duplicated rows with regards to the `text` column, as outlined in assignment 1.
 
 ## 2. Extract features
 
