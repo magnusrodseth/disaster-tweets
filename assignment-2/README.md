@@ -39,9 +39,9 @@ We used TF-IDF vectorization for the following reasons:
 
 Next, the data was split into a train and test set, with a test size of `0.3`.
 
-### 4.1 Based on the selected features
+### 4.1. Based on the selected features
 
-#### 4.1.1 Logistic regression
+#### 4.1.1. Logistic regression
 
 The first basic modelling method used was logistic regression. Logistic regression was chosen due to the following reasons:
 
@@ -72,23 +72,23 @@ Inspecting the confusion matrix:
 - 806 instances were correctly classified as class `0`, while 41 instances were incorrectly predicted as class `0` when they were actually class `1`.
 - Conversely, 554 instances were correctly labeled as class `1`, but 93 instances were wrongly classified as class `1` when they were in fact class `0`.
 
-#### 4.1.2 TODO
+#### 4.1.2 TODO: The rest of the basic modeling
 
-### 4.2 With hyperparameter tuning
+### 4.2. With hyperparameter tuning
 
 ...
 
-### 4.3 Explaining the reasoning behind the hyperparameter tuning
+### 4.3. Explaining the reasoning behind the hyperparameter tuning
 
 ...
 
 ## 5. Comparing modelling methods
 
-### 5.1 Selecting the modelling methods
+### 5.1. Selecting the modelling methods
 
 ...
 
-### 5.2 Reasoning
+### 5.2. Reasoning
 
 ...
 
@@ -118,6 +118,8 @@ Inspecting the confusion matrix:
 5. Comparison of modelling methods: (YES/NO)
 6. Advanced Pipeline Design: (YES/NO)
 
-### 8.1 Other questions
+### 8.1. Other questions
 
 > TODO: Add other quesions if they arise
+
+## 9
