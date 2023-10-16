@@ -45,7 +45,7 @@ Next, the data was split into a train and test set, with a test size of `0.3`.
 
 The first basic modelling method used was logistic regression. Logistic regression was chosen due to the following reasons:
 
-- **Binary Outcome**. The target variable (`target`) is binary, with values either `0` (Not Relevant) or `1` (Relevant). Logistic regression is specifically designed to model the probability of a binary outcome, making it a suitable choice for this dataset.
+- **Binary Outcome**. The target variable (`target`) is binary, with values either `0` (Not Relevant) or `1` (Relevant). Logistic regression is designed to model the probability of a binary outcome, making it a suitable choice for this dataset.
 
 - **Linear Decision Boundary**. Logistic regression assumes a linear relationship between the log-odds of the outcome and the predictor variables. If the relationship between the vectorized text features and the target variable is approximately linear in the log-odds space, logistic regression will perform well.
 
@@ -53,13 +53,13 @@ The first basic modelling method used was logistic regression. Logistic regressi
 
 The logistic regression model achieved an accuracy of approximately 91.03% on the test dataset. Analyzing the classification report, we observe the following details for each class:
 
-For class `0` ("Not Relevant"):
+For class `0` (Not Relevant):
 
 - **Precision**: 90% of the instances predicted as class `0` were correctly identified by the model.
 - **Recall**: Out of all the actual instances of class `0`, the model successfully recognized 95% of them.
 - **F1-Score**: The F1-score for class `0` is 92%.
 
-For class `1` ("Relevant"):
+For class `1` (Relevant):
 
 - **Precision**: 93% of the instances predicted as class `1` were correctly identified by the model.
 - **Recall**: Out of all the actual instances of class `1`, the model successfully recognized 86% of them.
@@ -72,7 +72,38 @@ Inspecting the confusion matrix:
 - 806 instances were correctly classified as class `0`, while 41 instances were incorrectly predicted as class `0` when they were actually class `1`.
 - Conversely, 554 instances were correctly labeled as class `1`, but 93 instances were wrongly classified as class `1` when they were in fact class `0`.
 
-#### 4.1.2 TODO: The rest of the basic modeling
+#### 4.1.2. Support Vector Machine (SVM)
+
+The second basic modelling method used was a support vector machine (SVM). SVMs were chosen due to the following reasons:
+
+- **High Dimensionality**. Text data, when transformed into a numerical format like TF-IDF or Count Vectorization, often results in a high-dimensional feature space, as each unique word or token becomes a dimension. SVMs are designed to handle high-dimensional data effectively.
+
+- **Effective in Non-linear Problems**. While the basic SVM is a linear classifier, by applying the kernel trick, SVMs can solve non-linear classification problems. This means that if the boundary between 'Relevant' and 'Not Relevant' is not linear in the feature space, SVM can still find an optimal boundary.
+
+- **Clear margin of separation**. SVMs aim to find the hyperplane that has the maximum margin between two classes. This often results in better generalization to unseen data, reducing the risk of overfitting.
+
+##### Results of support vector machine
+
+The Support Vector Machine model achieved an accuracy of approximately 91.43% on the test dataset. Delving deeper into the classification report, we can discern the following details for each class:
+
+For class `0` (Not Relevant):
+
+- **Precision**: Of all the instances the model predicted as class `0`, 91% were correctly identified.
+- **Recall**: Out of all the true instances of class `0` in the test set, the model successfully classified 94% of them.
+- **F1-Score**: The F1-score for this class is recorded at 93%.
+
+For class `1` (Relevant):
+
+- **Precision**: The model was accurate in predicting 92% of the instances as class `1`.
+- **Recall**: It managed to detect 88% of the actual instances of class `1`.
+- **F1-Score**: The F1-score for this class is recorded at 90%.
+
+Zooming out to a more generalized view, the macro average indicates an average precision, recall, and F1-score of approximately 92%, 91%, and 91% respectively. The weighted average, which factors in the number of instances in each class, indicates an average precision, recall, and F1-score all rounding to about 91%.
+
+Examining the confusion matrix:
+
+- The model correctly classified 799 instances as class `0`, while mistakenly predicting 48 instances as class `0` which were actually class `1`.
+- On the other hand, 567 instances were accurately labeled as class `1`. However, 80 instances were incorrectly classified as class `1` when they truly belonged to class `0`.
 
 ### 4.2. With hyperparameter tuning
 
