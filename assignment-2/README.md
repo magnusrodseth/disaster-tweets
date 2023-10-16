@@ -107,7 +107,19 @@ Examining the confusion matrix:
 
 ### 4.2. With hyperparameter tuning
 
-...
+For hyperparameter tuning, we used `GridSearchCV` to find the optimal hyperparameters for each model.
+
+#### 4.2.1. Logistic regression
+
+For logistic regression, we performed a grid search to identify the optimal combination of hyperparameters. We considered varying levels of regularization strength by adjusting the `C` parameter. The type of penalization was alternated between `l1` and `l2` norms using the `penalty` parameter. Additionally, different optimization algorithms were tested using the `solver` parameter, including `liblinear` and `saga`. The grid search cross-validated the model's performance for each combination to ensure robustness.
+
+The accuracy obtained after hyperparameter tuning is **the same** as the accuracy from the initial logistic regression model, both being approximately 91.03%. The hyperparameter tuning process validated that the initial parameters used for logistic regression were indeed optimal (or very close to optimal) for this dataset, as the accuracy remained unchanged.
+
+#### 4.2.2. Support Vector Machine (SVM)
+
+For the SVM, the regularization parameter `C` was adjusted to analyze the decision boundary. We explored different types of kernels using the `kernel` parameter, including `linear` and `rbf`. The coefficient for the kernel function, `gamma`, was also tuned, toggling between `scale` and `auto`. The grid search cross-validated the model's performance for each combination to ensure robustness.
+
+The accuracy obtained after hyperparameter tuning (approximately 91.63%) is **slightly higher** than the accuracy from the initial SVM model, which was around 91.43%. In particular, it was the change of `kernel` parameter: from `linear` to `rbf`. The hyperparameter tuning process for SVM managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
 
 ### 4.3. Explaining the reasoning behind the hyperparameter tuning
 
