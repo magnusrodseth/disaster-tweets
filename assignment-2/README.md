@@ -65,7 +65,7 @@ For class `1` (Relevant):
 - **Recall**: Out of all the actual instances of class `1`, the model successfully recognized 86% of them.
 - **F1-Score**: The F1-score for class `1` stands at 89%.
 
-On a broader scale, the macro average—which gives equal weight to each class—indicates an average precision, recall, and F1-score all of approximately 91%. The weighted average, which considers the number of instances in each class, also suggests an average precision, recall, and F1-score all around 91%.
+On a broader scale, the macro average indicates an average precision, recall, and F1-score all of approximately 91%. The weighted average, which considers the number of instances in each class, also suggests an average precision, recall, and F1-score all around 91%.
 
 Inspecting the confusion matrix:
 
@@ -74,7 +74,7 @@ Inspecting the confusion matrix:
 
 #### 4.1.2. Support Vector Machine (SVM)
 
-The second basic modelling method used was a support vector machine (SVM). SVMs were chosen due to the following reasons:
+The second basic modelling method used was a support vector machine (SVM). SVM were chosen due to the following reasons:
 
 - **High Dimensionality**. Text data, when transformed into a numerical format like TF-IDF or Count Vectorization, often results in a high-dimensional feature space, as each unique word or token becomes a dimension. SVMs are designed to handle high-dimensional data effectively.
 
@@ -98,7 +98,7 @@ For class `1` (Relevant):
 - **Recall**: It managed to detect 88% of the actual instances of class `1`.
 - **F1-Score**: The F1-score for this class is recorded at 90%.
 
-Zooming out to a more generalized view, the macro average indicates an average precision, recall, and F1-score of approximately 92%, 91%, and 91% respectively. The weighted average, which factors in the number of instances in each class, indicates an average precision, recall, and F1-score all rounding to about 91%.
+Zooming out to a more generalized view, the macro average indicates an average precision, recall, and F1-score of approximately 92%, 91%, and 91% respectively. The weighted average indicates an average precision, recall, and F1-score all rounding to about 91%.
 
 Examining the confusion matrix:
 
@@ -111,21 +111,39 @@ For hyperparameter tuning, we used `GridSearchCV` to find the optimal hyperparam
 
 #### 4.2.1. Logistic regression
 
-For logistic regression, we performed a grid search to identify the optimal combination of hyperparameters. We considered varying levels of regularization strength by adjusting the `C` parameter. The type of penalization was alternated between `l1` and `l2` norms using the `penalty` parameter. Additionally, different optimization algorithms were tested using the `solver` parameter, including `liblinear` and `saga`. The grid search cross-validated the model's performance for each combination to ensure robustness.
+For logistic regression, we performed a grid search to identify the optimal combination of hyperparameters. We considered varying levels of regularization strength by adjusting the `C` parameter. The type of penalization was alternated between `l1` and `l2` using the `penalty` parameter. Additionally, different optimization algorithms were tested using the `solver` parameter, including `liblinear` and `saga`. The grid search cross-validated the model's performance for each combination.
 
-The accuracy obtained after hyperparameter tuning is **the same** as the accuracy from the initial logistic regression model, both being approximately 91.03%. The hyperparameter tuning process validated that the initial parameters used for logistic regression were indeed optimal (or very close to optimal) for this dataset, as the accuracy remained unchanged.
+The accuracy obtained after hyperparameter tuning (approximately 91.36%) is **slightly higher** than the accuracy from the initial logistic regression model, which was around 91.03%. In particular, it was the change of `C` and `lbfgs` parameter: from `C=1.0` to `C=2.0` and from `lbfgs` to `liblinear`. The hyperparameter tuning process for logistic regression managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
 
 #### 4.2.2. Support Vector Machine (SVM)
 
-For the SVM, the regularization parameter `C` was adjusted to analyze the decision boundary. We explored different types of kernels using the `kernel` parameter, including `linear` and `rbf`. The coefficient for the kernel function, `gamma`, was also tuned, toggling between `scale` and `auto`. The grid search cross-validated the model's performance for each combination to ensure robustness.
+For the SVM, the regularization parameter `C` was adjusted to analyze the decision boundary. We explored different types of kernels using the `kernel` parameter, including `linear` and `rbf`. The coefficient for the kernel function, `gamma`, was also tuned, toggling between `scale` and `auto`. The grid search cross-validated the model's performance for each combination.
 
 The accuracy obtained after hyperparameter tuning (approximately 91.63%) is **slightly higher** than the accuracy from the initial SVM model, which was around 91.43%. In particular, it was the change of `kernel` parameter: from `linear` to `rbf`. The hyperparameter tuning process for SVM managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
 
 ### 4.3. Explaining the reasoning behind the hyperparameter tuning
 
-...
+#### 4.3.1. Logistic regression
+
+- **Regularization (`C`)**. The hyperparameter `C` is the inverse of regularization strength. Smaller values of `C` indicate stronger regularization, which can prevent overfitting, but might also lead to underfitting if too strong. On the other hand, larger values of `C` mean weaker regularization, which might fit the training data more closely but risk overfitting. By tuning `C`, we aim to strike the right balance between underfitting and overfitting.
+
+- **Penalty (`penalty`)**. The `penalty` parameter specifies the type of regularization to be applied. The most common types are L1 and L2 regularization. L1 regularization can lead to some coefficients becoming exactly zero, effectively selecting a simpler model with fewer features. On the other hands, L2 regularization tends to shrink coefficients but not set them to zero. The choice between L1 and L2 can impact the model's performance and interpretability.
+
+- **Solver (`solver`)**. The `solver` parameter dictates the optimization algorithm to be used. Different solvers might converge at different rates and can have varying levels of accuracy, depending on the nature of the data and the problem. Some solvers work better with certain penalty types, making it important to consider the combination of `solver` and `penalty` when tuning the model.
+
+#### 4.3.2. Support Vector Machine (SVM)
+
+- **Regularization (`C`)**. Like in Logistic Regression, the `C` parameter in SVM controls the trade-off between obtaining a wider margin and classifying the training points correctly. A smaller `C` creates a wider margin, which might misclassify more points, while a larger `C` results in a narrower margin, making the model fit more closely to the training data. Adjusting `C` helps balance between overfitting (high variance) and underfitting (high bias).
+
+- **Kernel (`kernel`)**. The kernel trick allows SVM to create non-linear decision boundaries. The choice of kernel can significantly impact the model's performance. The `rbf` (Radial Basis Function) kernel, on the other hand, can create more complex, non-linear boundaries.
+
+- **Kernel Coefficient (`gamma`)**. Adjusting `gamma` can help control the shape and complexity of the decision boundary, impacting the model's generalization capability.
+
+In summary, hyperparameter tuning for both Logistic Regression and SVM involves adjusting key parameters that control model complexity, regularization, and the nature of the decision boundary. The goal is to find the optimal combination of hyperparameters that results in the best performance on unseen data, ensuring that the model is both accurate and generalizable.
 
 ## 5. Comparing modelling methods
+
+> TODO: Write a paragraph about the comparison of the modelling methods.
 
 ### 5.1. Selecting the modelling methods
 
