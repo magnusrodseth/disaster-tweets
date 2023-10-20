@@ -165,6 +165,30 @@ In summary, hyperparameter tuning for both Logistic Regression and SVM involves 
 - Bagging
   - Random forest telles her som en advanced modelling technique, så kanskje vi ikke skal ha den med på basic.
 - Boosting
+  <!-- TODO: Jeg slang noe kjapt sammen fordi jeg er på reise i dag (torsdag), gjerne se over og gi tilbakemelding, så har jeg mer tid til å se gjennom imorgen (fredag) og endre før vi leverer. -->
+  Considering that the machine learning problem is a binary classification problem, we have chosen to use a Boosting method, more specifically the Gradient Boosting Machines (GBM).
+
+### 6.1 Gradient Boosting Machines
+
+Incorporating GBM, these are the complete steps of the pipeline:
+
+1. **Data Preprocessing:** As previously explained this includes removing unnecessary features, cleaning textual data, and handling categorical data.
+
+2. **Feature Extraction:** Continue with the TF-IDF vectorization as explained in section 4 to create collection of features to a matrix of TF-IDF features. This is done to reduce dimensionality and to normalize the data. The data is then split into training and test sets.
+
+3. **Modeling:** Implement GBM. Libraries such as XGBoost or LightGBM can be used. Reasoning for this will be provided below.
+
+4. **Hyperparameter Tuning:** Utilize GridSearchCV to optimize hyperparameters for logistic regression and SVM.
+
+5. **Evaluation:** Use the test set to evaluate the model's performance based on precision, recall, F1-score, and accuracy.
+
+**Justification for Choosing GBM:**
+
+**Sequential Learning:** GBM builds trees one at a time, where each new tree helps correct the errors made by the previously trained tree. This makes the model learn and adapt continuously through each iteration, and can therefore result in a higher accuracy.
+
+**Handling High Dimensionality:** Since our data is in the form of text, it is high-dimensional data. Each word becomes its own dimension. GBM can effectively handle this kind of data. In each iteration, GBM focuses on the errors (or residuals) from the previous set of trees, pinpointing areas where previous models struggled. This iterative refinement ensures that even in a high-dimensional feature space, the algorithm efficiently identifies and concentrates on the most informative features, sidelining those that are less relevant.
+
+**Regularization:** To prevent overfitting, GBM incorporates L1 and L2 regularization.
 
 ## 7. Individual contributions
 
