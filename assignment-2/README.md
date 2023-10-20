@@ -1,6 +1,6 @@
 # IT3212 - Assignment 2
 
-Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Hembre, Max Gunhamn, Sebastian Sole, and Magnus Rødseth.
+Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Czternasty Hembre, Max Gunhamn, Sebastian Sole, and Magnus Rødseth.
 
 ## 1. Implement the preprocessing
 
