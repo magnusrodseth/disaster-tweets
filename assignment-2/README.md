@@ -6,7 +6,7 @@ Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Czternasty H
 
 We started by removing features, according to what was outlined in assignment 1. Next, we removed rows with a confidence threshold below `1.0`.
 
-Next, we preprocessed the textual data. We cleaned up the `keyword` column, ensuring that all keywords were lower case, and that all keywords were separated by a single space. For comparison, some keywords were on the format `airplane%20accident`, which should be `airplane accident`.
+Next, we preprocessed the textual data. We cleaned up the `keyword` column, ensuring that all keywords were lower case becuase lowercasing the keywords allows for case-insensitive matching and simplifies the analysis process. We also ensured that all keywords were separated by a single space. For comparison, some keywords were on the format `airplane%20accident`, which should be `airplane accident`.
 
 Furthermore, we cleaned the `text` column. The first part of this included removing links, line breaks, extra spaces, special characters and punctuation. Next, we removed English stopwords. Finally, we lemmatized the text.
 
