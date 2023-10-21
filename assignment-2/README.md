@@ -16,10 +16,155 @@ Moreover, we removed duplicated rows with regards to the `text` column, as outli
 
 ## 2. Extract features
 
+
 - `hashtag_count`
+
+Hashtag counts were extracted, as we suspected tweets related to a disaster might contain more hashtags than a tweet which does not. This also had to be done before preprocessing, as we remove hashtags in the preprocessing step.
+
+```py
+# Extract the number of hashtags
+df['hashtag_count'] = df['text'].apply(lambda x: len([c for c in str(x) if c == '#']))
+```
+
 - `mention_count`
+  
+Mention count is a feature where we see how many mentions there are in a tweet. This means how many other twitter users are mentioned in the tweet. 
+This was extracted because we thought there might be a connection betweeen how many users were tagged and if the tweets are disaster-related. The group thought that disaster-related tweets would have more mentions than tweets that were not disaster related.
+
+```py
+# Extract the number of mentions
+df['mention_count'] = df['text'].apply(lambda x: len([c for c in str(x) if c == '@']))
+```
+
 - `has_url`
-- n-grams
+
+Has_url was extracted because tweets related to a disaster might point to an online resource where one can find more info about the situation. The column is 1 if the tweet contains a url and 0 if not. 
+The has_url feature had to be done before preprocessing, as we remove links in the preprocessing step.  
+
+```py
+# Extract the `has_url` feature
+df['has_url'] = df['text'].apply(lambda x: 1 if 'http' in str(x) else 0)
+```
+
+- `n-grams`
+
+N-grams was a feature we wanted to look at, as we suspected there could be a correlation between bigrams/ trigrams and if the tweet was disaster-related or not, as bigrams and trigrams have more context than just single words. We found the most used bigrams and trigrams, both for disaster-related tweets and non-disaster related tweets. 
+
+```py
+from nltk.util import ngrams
+from nltk.tokenize import word_tokenize
+
+
+def create_ngrams(text, n):
+    tokens = word_tokenize(text)
+    n_grams = list(ngrams(tokens, n))
+    return n_grams
+
+
+df['bigrams'] = df['cleaned_text'].apply(lambda x: create_ngrams(x, 2))
+df['trigrams'] = df['cleaned_text'].apply(lambda x: create_ngrams(x, 3))
+```
+
+To check which bigrams were most common, both in disaster-related tweets and non-disaster related tweets (according to choose_one column)
+```py
+from collections import Counter
+df['is_disaster'] = df['choose_one'].map({"Relevant": 1, "Not Relevant": 0})
+
+disaster_bigrams = df[df['is_disaster'] == 1]['bigrams']
+non_disaster_bigrams = df[df['is_disaster'] == 0]['bigrams']
+
+disaster_bigram_counts = Counter([gram for ngram_list in disaster_bigrams for gram in ngram_list])
+non_disaster_bigram_counts = Counter([gram for ngram_list in non_disaster_bigrams for gram in ngram_list])
+
+# Example: Print the most common n-grams in disaster-related tweets
+print("Most common n-grams in disaster-related tweets:")
+print(disaster_bigram_counts.most_common(10))
+
+# Example: Print the most common n-grams in non-disaster tweets
+print("\nMost common n-grams in non-disaster tweets:")
+print(non_disaster_bigram_counts.most_common(10)) 
+```
+Result for bigrams:
+```py
+Most common n-grams in disaster-related tweets:
+[(('suicide', 'bomber'), 78), (('northern', 'california'), 53), (('california', 'wildfire'), 44), (('home', 'razed'), 37), (('suicide', 'bombing'), 36), (('oil', 'spill'), 36), (('latest', 'home'), 36), (('razed', 'northern'), 36), (('severe', 'thunderstorm'), 35), (('70', 'year'), 34)]
+
+Most common n-grams in non-disaster tweets:
+[(('i', 'am'), 173), (('do', 'not'), 89), (('can', 'not'), 51), (('you', 'are'), 50), (('youtube', 'video'), 33), (('liked', 'youtube'), 32), (('i', 'have'), 26), (('cross', 'body'), 26), (('body', 'bag'), 26), (('going', 'to'), 25)]
+```
+
+Did the same for trigrams
+```py
+df['is_disaster'] = df['choose_one'].map({"Relevant": 1, "Not Relevant": 0})
+
+# Create separate lists of trigrams for disaster and non-disaster tweets
+disaster_trigrams = df[df['is_disaster'] == 1]['trigrams']
+non_disaster_trigrams = df[df['is_disaster'] == 0]['trigrams']
+
+# Count the frequency of trigrams in both categories
+disaster_trigram_counts = Counter([gram for ngram_list in disaster_trigrams for gram in ngram_list])
+non_disaster_trigram_counts = Counter([gram for ngram_list in non_disaster_trigrams for gram in ngram_list])
+
+# Example: Print the most common trigrams in disaster-related tweets
+print("Most common trigrams in disaster-related tweets:")
+print(disaster_trigram_counts.most_common(10))
+
+# Example: Print the most common trigrams in non-disaster tweets
+print("\nMost common trigrams in non-disaster tweets:")
+print(non_disaster_trigram_counts.most_common(10))
+```
+
+Result for trigrams: 
+
+```py
+Most common trigrams in disaster-related tweets:
+[(('northern', 'california', 'wildfire'), 38), (('latest', 'home', 'razed'), 36), (('home', 'razed', 'northern'), 36), (('razed', 'northern', 'california'), 35), (('watch', 'airport', 'get'), 34), (('airport', 'get', 'swallowed'), 34), (('get', 'swallowed', 'sandstorm'), 34), (('swallowed', 'sandstorm', 'minute'), 34), (('suicide', 'bomber', 'detonated'), 34), (('pkk', 'suicide', 'bomber'), 32)]
+
+Most common trigrams in non-disaster tweets:
+[(('liked', 'youtube', 'video'), 32), (('i', 'am', 'going'), 18), (('pick', 'fan', 'army'), 18), (('cross', 'body', 'bag'), 17), (('reddits', 'new', 'content'), 11), (('new', 'content', 'policy'), 11), (('low', 'selfimage', 'take'), 10), (('selfimage', 'take', 'quiz'), 10), (('deluged', 'invoice', 'make'), 10), (('likely', 'rise', 'top'), 10)]
+```
+
+
+
+
+- `sentiment analysis`
+
+We implemented sentiment analysis, to investigate if the sentiment of the tweet would be relevant to classifying the tweet as disaster-related or not. We did this through nltks "vader":
+
+```py
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+def analyze_sentiment_vader(text):
+    analyzer = SentimentIntensityAnalyzer()
+    sentiment_scores = analyzer.polarity_scores(text)
+    if sentiment_scores['compound'] >= 0.05:
+        return "Positive"
+    elif sentiment_scores['compound'] <= -0.05:
+        return "Negative"
+    else:
+        return "Neutral"
+
+df['sentiment'] = df['cleaned_text'].apply(analyze_sentiment_vader)
+
+```
+
+When we checked, it was under a 5% connection between sentiment of the tweet and disaster relation. Therefore, we chose to drop this column. (IKKE GJORT ENDA)  We tested this both before and after preprocessing of the text, but the results were the same. 
+
+```py
+from scipy import stats
+disaster_group = df[df['choose_one'] == "Disaster"]
+not_disaster_group = df[df['choose_one'] == "Not Disaster"]
+
+t_statistic, p_value = stats.ttest_ind(disaster_group['sentiment'], not_disaster_group['sentiment'], equal_var=False)
+
+if p_value < 0.05:
+    print("There is a significant difference in sentiment between disaster and not disaster tweets.")
+else:
+    print("There is no significant difference in sentiment between disaster and not disaster tweets.")
+```
+
+- `TF_IDF vectorizing`
+
+Will be discussed in [implement basic modelling methods](#4-implement-basic-modelling-methods). 
 
 ## 3. Select features
 
