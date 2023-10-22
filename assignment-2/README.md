@@ -4,7 +4,7 @@ Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Czternasty H
 
 ## 1. Implement the preprocessing
 
-We started by removing features, according to what was outlined in assignment 1. Next, we removed rows with a confidence threshold below `1.0`.
+We started by removing features, according to what was outlined in assignment 1. Additionally, we removed the `location` feature to preserve the privacy of the users and because it is not particularly relevant to determing whether a tweet is related to a disaster. Next, we removed rows with a confidence threshold below `1.0`.
 
 Next, we preprocessed the textual data. We cleaned up the `keyword` column, ensuring that all keywords were lower case, and that all keywords were separated by a single space. For comparison, some keywords were on the format `airplane%20accident`, which should be `airplane accident`.
 
