@@ -299,16 +299,56 @@ In summary, hyperparameter tuning for both Logistic Regression and SVM involves 
 
 ## 6. Designing a pipeline
 
-> Based on one advanced modelling technique. Justify choices.
+> Apart from that, design (not develop) your pipeline based on one Advanced modelling techniques.  Justify your choices (10%).
 
-- Ensamble learning
-  - Max voting (generally used for classification problems)
-  - Average (Can be used for making predictions in regression problems, or while calculating probabilities for classification problems)
-- Stacking
-- Blending
-- Bagging
-  - Random forest telles her som en advanced modelling technique, så kanskje vi ikke skal ha den med på basic.
-- Boosting
+### Advanced Modelling Technique
+
+The advanced modelling technique we have chosen is transfer learning, using the BERT model.  BERT, or Bidirectional Encoder Representations from Transformers, is a family of deep learning language models developed by Google. BERT is a pre-trained model that can be fine-tuned for specific tasks, i.e. transfer learning. In our case, the knowledge gained from pre-training BERT on vast amounts of unlabeled text for a different source task can be transferred to the target task of classifying disaster-related tweets. 
+
+### Pipeline Design
+
+1. Importing data
+
+We will import the data like in our current pipeline. 
+
+2. Preprocessing the data
+
+BERT does some preprocessing of the data itself. However, we will still do some preprocessing spesific to the domain of tweets. We will remove links, line breaks, extra spaces, special characters and punctuation. 
+
+When we have the data preprocessed, we will use the BERT model to extract features from the text data. First we will load a pre-trained BERT classifier, configured to classify text into two classes. 
+
+The next step of the pipeline is fine tuning the model on our dataset. 
+
+In the final step of the pipeline, we will use the fine-tuned BERT model to classify the tweets in the test set.
+
+### Justification
+1. Bidirectional Contextual Understanding:
+Traditional models like LSTM and GRU read text sequentially, either from left to right or right to left. In contrast, BERT comprehensively analyzes text bidirectionally, ensuring it captures context from both directions.
+
+Tweets, due to their brevity, often contain condensed information where the context of a single word can be influenced by words both before and after it. BERT's bidirectional approach ensures nuanced understanding, making it especially suitable for tweet classification.
+
+2. Proven Performance Across Diverse NLP Tasks:
+Since its introduction, BERT has consistently set benchmark performances on various NLP challenges, ranging from question answering to sentiment analysis.
+
+The wide-ranging success of BERT on different tasks suggests its adaptability and robustness. By selecting BERT, we're leveraging a model with a proven track record, increasing our chances of achieving high accuracy on our specific task of classifying disaster-related tweets.
+
+3. Transfer Learning and Pre-training Advantages:
+BERT is pre-trained on vast amounts of text data, learning a wealth of language patterns, structures, and nuances. This pre-trained knowledge can be fine-tuned on a smaller, task-specific dataset, making the model training faster and potentially more accurate.
+
+BERT's capability to transfer knowledge from its extensive pre-training to our specific task can lead to strong performance even with only our limited training data.
+
+4. BERT's Versatility:
+Description: BERT isn't just a one-size-fits-all model. It has various versions tailored to different needs, from smaller, faster models like DistilBERT to more extensive, potentially more accurate versions like RoBERTa.
+
+The flexibility in choosing a BERT variant allows us to strike a balance between computational efficiency and model performance. For instance, if we need faster predictions (e.g., in a real-time monitoring system), we might opt for DistilBERT. If we seek higher accuracy and have the computational resources, RoBERTa could be the choice.
+
+### Potential improvements / alternatives
+BERT isn't just a one-size-fits-all model. It has various versions tailored to different needs, from smaller, faster models like DistilBERT to more extensive, potentially more accurate versions like RoBERTa.
+
+The flexibility in choosing a BERT variant allows us to strike a balance between computational efficiency and model performance. For instance, if we need faster predictions (e.g., in a real-time monitoring system), we might opt for DistilBERT. If we seek higher accuracy and have the computational resources, RoBERTa could be the choice.
+
+
+
 
 ## 7. Individual contributions
 
