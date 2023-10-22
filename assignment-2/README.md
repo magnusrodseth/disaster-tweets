@@ -16,8 +16,7 @@ Moreover, we removed duplicated rows with regards to the `text` column, as outli
 
 ## 2. Extract features
 
-
-- `hashtag_count`
+### 2.1. Counting hashtags
 
 Hashtag counts were extracted, as we suspected tweets related to a disaster might contain more hashtags than a tweet which does not. This also had to be done before preprocessing, as we remove hashtags in the preprocessing step.
 
@@ -26,9 +25,9 @@ Hashtag counts were extracted, as we suspected tweets related to a disaster migh
 df['hashtag_count'] = df['text'].apply(lambda x: len([c for c in str(x) if c == '#']))
 ```
 
-- `mention_count`
-  
-Mention count is a feature where we see how many mentions there are in a tweet. This means how many other twitter users are mentioned in the tweet. 
+### 2.2. Counting mentions
+
+The `mention_count` is a feature where we see how many mentions there are in a tweet. This means how many other twitter users are mentioned in the tweet.
 This was extracted because we thought there might be a connection betweeen how many users were tagged and if the tweets are disaster-related. The group thought that disaster-related tweets would have more mentions than tweets that were not disaster related.
 
 ```py
@@ -36,19 +35,18 @@ This was extracted because we thought there might be a connection betweeen how m
 df['mention_count'] = df['text'].apply(lambda x: len([c for c in str(x) if c == '@']))
 ```
 
-- `has_url`
+### 2.3. Checking if the tweet contains a url
 
-Has_url was extracted because tweets related to a disaster might point to an online resource where one can find more info about the situation. The column is 1 if the tweet contains a url and 0 if not. 
-The has_url feature had to be done before preprocessing, as we remove links in the preprocessing step.  
+The `has_url` feature was extracted because tweets related to a disaster might point to an online resource where one can find more information about the situation. The column is `1` if the tweet contains a url and `0` if not. The `has_url` feature had to be done before preprocessing, as we remove links in the preprocessing step.
 
 ```py
 # Extract the `has_url` feature
 df['has_url'] = df['text'].apply(lambda x: 1 if 'http' in str(x) else 0)
 ```
 
-- `n-grams`
+### 2.4. N-grams
 
-N-grams was a feature we wanted to look at, as we suspected there could be a correlation between bigrams/ trigrams and if the tweet was disaster-related or not, as bigrams and trigrams have more context than just single words. We found the most used bigrams and trigrams, both for disaster-related tweets and non-disaster related tweets. 
+N-grams was a feature we wanted to look at, as we suspected there could be a correlation between bi- or trigrams and whether the tweet was related to a disaster or not. This is because bigrams and trigrams carry more context than than single words. We found the most used bigrams and trigrams, both for disaster-related tweets and non-disaster related tweets.
 
 ```py
 from nltk.util import ngrams
@@ -65,7 +63,8 @@ df['bigrams'] = df['cleaned_text'].apply(lambda x: create_ngrams(x, 2))
 df['trigrams'] = df['cleaned_text'].apply(lambda x: create_ngrams(x, 3))
 ```
 
-To check which bigrams were most common, both in disaster-related tweets and non-disaster related tweets (according to choose_one column)
+We also inspected the most common bigrams and trigrams in disaster-related tweets and non-disaster related tweets:
+
 ```py
 from collections import Counter
 df['is_disaster'] = df['choose_one'].map({"Relevant": 1, "Not Relevant": 0})
@@ -82,9 +81,11 @@ print(disaster_bigram_counts.most_common(10))
 
 # Example: Print the most common n-grams in non-disaster tweets
 print("\nMost common n-grams in non-disaster tweets:")
-print(non_disaster_bigram_counts.most_common(10)) 
+print(non_disaster_bigram_counts.most_common(10))
 ```
+
 Result for bigrams:
+
 ```py
 Most common n-grams in disaster-related tweets:
 [(('suicide', 'bomber'), 78), (('northern', 'california'), 53), (('california', 'wildfire'), 44), (('home', 'razed'), 37), (('suicide', 'bombing'), 36), (('oil', 'spill'), 36), (('latest', 'home'), 36), (('razed', 'northern'), 36), (('severe', 'thunderstorm'), 35), (('70', 'year'), 34)]
@@ -94,6 +95,7 @@ Most common n-grams in non-disaster tweets:
 ```
 
 Did the same for trigrams
+
 ```py
 df['is_disaster'] = df['choose_one'].map({"Relevant": 1, "Not Relevant": 0})
 
@@ -114,7 +116,7 @@ print("\nMost common trigrams in non-disaster tweets:")
 print(non_disaster_trigram_counts.most_common(10))
 ```
 
-Result for trigrams: 
+Result for trigrams:
 
 ```py
 Most common trigrams in disaster-related tweets:
@@ -124,12 +126,9 @@ Most common trigrams in non-disaster tweets:
 [(('liked', 'youtube', 'video'), 32), (('i', 'am', 'going'), 18), (('pick', 'fan', 'army'), 18), (('cross', 'body', 'bag'), 17), (('reddits', 'new', 'content'), 11), (('new', 'content', 'policy'), 11), (('low', 'selfimage', 'take'), 10), (('selfimage', 'take', 'quiz'), 10), (('deluged', 'invoice', 'make'), 10), (('likely', 'rise', 'top'), 10)]
 ```
 
+### 2.5. Sentiment analysis
 
-
-
-- `sentiment analysis`
-
-We implemented sentiment analysis, to investigate if the sentiment of the tweet would be relevant to classifying the tweet as disaster-related or not. We did this through nltks "vader":
+We implemented sentiment analysis, to investigate if the sentiment of the tweet would be relevant to classifying the tweet as disaster-related or not. We did this using the `SentimentIntensityAnalyzer` from `nltk`:
 
 ```py
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -147,7 +146,7 @@ df['sentiment'] = df['cleaned_text'].apply(analyze_sentiment_vader)
 
 ```
 
-When we checked, it was under a 5% connection between sentiment of the tweet and disaster relation. Therefore, we chose to drop this column. (IKKE GJORT ENDA)  We tested this both before and after preprocessing of the text, but the results were the same. 
+When we checked, it was under a 5% connection between sentiment of the tweet and disaster relation. Therefore, we chose to drop this column. (IKKE GJORT ENDA) We tested this both before and after preprocessing of the text, but the results were the same.
 
 ```py
 from scipy import stats
@@ -162,9 +161,9 @@ else:
     print("There is no significant difference in sentiment between disaster and not disaster tweets.")
 ```
 
-- `TF_IDF vectorizing`
+### 2.6. TF-IDF vectorization
 
-Will be discussed in [implement basic modelling methods](#4-implement-basic-modelling-methods). 
+This is discussed further in the [modelling section](#4-implement-basic-modelling-methods).
 
 ## 3. Select features
 
