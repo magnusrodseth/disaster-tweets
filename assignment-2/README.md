@@ -67,19 +67,19 @@ We also inspected the most common bigrams and trigrams in disaster-related tweet
 
 ```py
 from collections import Counter
-df['is_disaster'] = df['choose_one'].map({"Relevant": 1, "Not Relevant": 0})
 
-disaster_bigrams = df[df['is_disaster'] == 1]['bigrams']
-non_disaster_bigrams = df[df['is_disaster'] == 0]['bigrams']
+
+disaster_bigrams = df[df['target'] == 1]['bigrams']
+non_disaster_bigrams = df[df['target'] == 0]['bigrams']
 
 disaster_bigram_counts = Counter([gram for ngram_list in disaster_bigrams for gram in ngram_list])
 non_disaster_bigram_counts = Counter([gram for ngram_list in non_disaster_bigrams for gram in ngram_list])
 
-# Example: Print the most common n-grams in disaster-related tweets
+
 print("Most common n-grams in disaster-related tweets:")
 print(disaster_bigram_counts.most_common(10))
 
-# Example: Print the most common n-grams in non-disaster tweets
+
 print("\nMost common n-grams in non-disaster tweets:")
 print(non_disaster_bigram_counts.most_common(10))
 ```
@@ -97,21 +97,19 @@ Most common n-grams in non-disaster tweets:
 Did the same for trigrams
 
 ```py
-df['is_disaster'] = df['choose_one'].map({"Relevant": 1, "Not Relevant": 0})
 
-# Create separate lists of trigrams for disaster and non-disaster tweets
-disaster_trigrams = df[df['is_disaster'] == 1]['trigrams']
-non_disaster_trigrams = df[df['is_disaster'] == 0]['trigrams']
+disaster_trigrams = df[df['target'] == 1]['trigrams']
+non_disaster_trigrams = df[df['target'] == 0]['trigrams']
 
-# Count the frequency of trigrams in both categories
+
 disaster_trigram_counts = Counter([gram for ngram_list in disaster_trigrams for gram in ngram_list])
 non_disaster_trigram_counts = Counter([gram for ngram_list in non_disaster_trigrams for gram in ngram_list])
 
-# Example: Print the most common trigrams in disaster-related tweets
+
 print("Most common trigrams in disaster-related tweets:")
 print(disaster_trigram_counts.most_common(10))
 
-# Example: Print the most common trigrams in non-disaster tweets
+
 print("\nMost common trigrams in non-disaster tweets:")
 print(non_disaster_trigram_counts.most_common(10))
 ```
