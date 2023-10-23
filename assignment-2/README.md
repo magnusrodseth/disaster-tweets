@@ -299,9 +299,71 @@ In summary, hyperparameter tuning for both Logistic Regression and SVM involves 
 
 > Apart from that, design (not develop) your pipeline based on one Advanced modelling techniques.  Justify your choices (10%).
 
+The advanced modelling technique we have chosen is Word2Vec embeddings coupled with a Random Forest classifier.
+
+### Pipeline Design
+Importing Data:
+
+Similar to the previous pipeline, we start by importing the necessary data.
+
+**Preprocessing the Data:**
+
+We clean the tweets like the current pipeline.
+
+**Word Embeddings with Word2Vec:**
+
+Instead of using tf-idf vectorization, we use Word2Vec to generate word embeddings for each tweet. This is a more sophisticated approach that capture the semantic meaning of words.
+
+We will first pre-trained a Word2Vec model on a large document corpus using the `gensim`-library. Then, we will use the pre-trained model to generate embeddings for each tweet in our dataset. 
+
+**Training a Random Forest Classifier:**
+
+Train a Random Forest classifier on the Word2Vec embeddings from the training set. Fine-tune the hyperparameters of the classifier to achieve the best possible performance.
+
+**Evaluation:**
+
+Use the trained Random Forest model to classify tweets in the test set. Evaluate the model's performance using F1-score.
+
+### Justification
+
+Word2Vec captures the semantic meaning of a word by representing it based on the context the word appears. The assumption is that words with similar meanings appear in similar contexts. This means words with similar meanings will have embeddings that are close in the vector space.
+
+**Simplicity:**
+
+Both Word2Vec and Random Forest are relatively simple models that are easy to implement and interpret. This makes the pipeline possible for us to actually understand. 
+
+We considered these alternatives to Word2Vec:
+- Glove
+- FastText
+- Universal Sentence Encoder by Google
+
+FastText generates embeddings for subwords, so even if a word hasn't been seen during training, it can create a representation for it based on its subwords. This feature can be particularly useful for tweets, which often have misspellings, abbreviations, and neologisms.
+
+However, we found Word2Vec to be the simplest and most intuitive approach. If we find that Word2Vec doesn't perform well, we can consider using FastText instead.
+
+For the classifier, we considered using XGBoost or a neural network with x layers. However, we want to start with a simple model like Random Forest and then move on to more complex models if necessary.
+
+In the end, we considered using BERT for the whole pipeline. This would probably result in very good scores using BERTs transfer learning structure. However, we found the transformer architecture and attention mechanism very complex to understand. Altough it is easy to implement a solution applying a small BERT model in code, we would not be able to understand how it works. 
+
+Random Forest inherently has mechanisms (like bootstrapping and feature randomness) that can reduce the risk of overfitting, especially when dealing with high-dimensional data like Word2Vec embeddings.
+
+Potential Improvements / Alternatives
+BERT and its Variants:
+
+As previously mentioned, BERT, along with its variants like DistilBERT and RoBERTa, can offer state-of-the-art performance in text classification tasks. By fine-tuning a pre-trained BERT model on our dataset, we might achieve better accuracy than Word2Vec + Random Forest.
+Combining Multiple Embeddings:
+
+Instead of just relying on Word2Vec, combining embeddings from multiple sources (e.g., FastText, GloVe) might enhance the feature set for the classifier.
+Deep Learning Models:
+
+Neural network architectures, especially recurrent (like LSTMs) or transformer-based models, can handle sequential data like tweets more effectively. Coupling Word2Vec with a neural network might further improve performance.
+Ensemble Methods:
+
+Instead of just using Random Forest, an ensemble of multiple classifiers might yield better results. Methods like stacking can be explored to combine predictions from various models.
+
 ### Advanced Modelling Technique
 
-The advanced modelling technique we have chosen is transfer learning, using the BERT model.  BERT, or Bidirectional Encoder Representations from Transformers, is a family of deep learning language models developed by Google. BERT is a pre-trained model that can be fine-tuned for specific tasks, i.e. transfer learning. In our case, the knowledge gained from pre-training BERT on vast amounts of unlabeled text for a different source task can be transferred to the target task of classifying disaster-related tweets. 
+The advanced modelling technique we have chosen is transfer learning using the BERT model. BERT, or Bidirectional Encoder Representations from Transformers, is a family of deep learning language models developed by Google. BERT is a pre-trained model that can be fine-tuned for specific tasks, i.e. transfer learning. In our case, the knowledge gained from pre-training BERT on vast amounts of unlabeled text for a different source task can be transferred to the target task of classifying disaster-related tweets. 
 
 ### Pipeline Design
 
