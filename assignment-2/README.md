@@ -144,7 +144,10 @@ df['sentiment'] = df['cleaned_text'].apply(analyze_sentiment_vader)
 
 ```
 
-Based on this code, it seemed like it was a significant difference in the sentiment between the disaster-related and not disaster-related tweets. We then looked at the counts for each sentiment, and saw there was a distribution imbalance where the majority of disaster-related tweets had a neutral or negative sentiment, whilst there was way more positive sentiment amongst the "non-disaster-related" tweets. 
+Based on this code, it seemed like it was a significant difference in the sentiment between the disaster-related and not disaster-related tweets. We then looked at the counts for each sentiment, and saw there was a distribution imbalance where the majority of disaster-related tweets had a negative sentiment, whilst there was way more positive sentiment amongst the "non-disaster-related" tweets. 
+
+We also tested with "text" instead of "cleaned_text" and the results were still the same (significant difference).
+
 
 ```py
 
