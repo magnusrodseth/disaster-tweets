@@ -144,15 +144,21 @@ df['sentiment'] = df['cleaned_text'].apply(analyze_sentiment_vader)
 
 ```
 
-When we checked, it was under a 5% connection between sentiment of the tweet and disaster relation. Therefore, we chose to drop this column. (IKKE GJORT ENDA) We tested this both before and after preprocessing of the text, but the results were the same.
+Based on this code, it seemed like it was a significant difference in the sentiment between the disaster-related and not disaster-related tweets. We then looked at the counts for each sentiment, and saw there was a distribution imbalance where the majority of disaster-related tweets had a neutral or negative sentiment, whilst there was way more positive sentiment amongst the "non-disaster-related" tweets. 
 
 ```py
+
 from scipy import stats
-disaster_group = df[df['choose_one'] == "Disaster"]
-not_disaster_group = df[df['choose_one'] == "Not Disaster"]
 
-t_statistic, p_value = stats.ttest_ind(disaster_group['sentiment'], not_disaster_group['sentiment'], equal_var=False)
 
+df['sentiment_numeric'] = df['sentiment'].map({'Negative': 0, 'Neutral': 1, 'Positive': 2})
+
+disaster_group = df[df['target'] == 1]['sentiment_numeric']
+not_disaster_group = df[df['target'] == 0]['sentiment_numeric']
+
+t_statistic, p_value = stats.ttest_ind(disaster_group, not_disaster_group, equal_var=False)
+
+print(p_value)
 if p_value < 0.05:
     print("There is a significant difference in sentiment between disaster and not disaster tweets.")
 else:
