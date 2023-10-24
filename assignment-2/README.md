@@ -301,12 +301,10 @@ In summary, hyperparameter tuning for both Logistic Regression and SVM involves 
 
 ## 6. Designing a pipeline
 
-> Apart from that, design (not develop) your pipeline based on one Advanced modelling techniques. Justify your choices (10%).
-
-The advanced modelling technique we have chosen are Word2Vec embeddings coupled with a Random Forest classifier. Both Word2Vec and Random Forest are relatively simple models that are easy to implement and interpret. This makes them suitable for this project.
+The advanced modelling technique we have chosen are Word2Vec embeddings coupled with a Random Forest classifier. 
 
 ### Word2Vec
-Word2vec is a technique for natural language processing from 2013. The word2vec algorithm uses a neural network model to learn word associations from a large corpus of text. Once trained, it can detect synonymous words or suggest additional words for a partial sentence. In the same way as tf-idf (our current approach), word2vec represents each document with a vector. The vectors are chosen such that they capture the semantic and syntactic qualities of the words.
+Word2vec is a technique for natural language processing from 2013. The word2vec algorithm uses a shallow neural network model to learn word associations from a large corpus of text. Once trained, it can detect synonymous words or suggest additional words for a partial sentence. In the same way as tf-idf (our current approach), word2vec represents each document with a vector. The vectors are chosen such that they capture the semantic and syntactic qualities of the words.
 
 We will use the library `gensim` to train a Word2Vec model on a large corpus of text. Then, we will use the pre-trained model to generate embeddings for each tweet in our dataset. The embeddings will be used as features in our Random Forest classifier.
 
@@ -320,12 +318,12 @@ These are two important techniques the algorithm uses:
 Bagging (Bootstrap Aggregating): For each tree, a random sample of the data is drawn with replacement, creating diverse sets of training data. This process introduces variability among the trees, ensuring individual trees are trained on slightly different versions of the data.
 Feature Randomness: During tree construction, instead of considering all features for a split, a random subset of features is chosen. This adds another layer of randomness and reduces the correlation between individual trees.
 
-Similarly to the reason we chose Word2Vec, we chose Random Forest because it is a simple and intuitive approach compared to other ensemble methods like XGBoost or neural networks.
+Similarly to the reason we chose Word2Vec, we chose Random Forest because it is a simple and intuitive approach compared to other ensemble methods like XGBoost,  or neural networks.
 
 ### Side note about transformer models
-We heavily considered using BERT for the whole pipeline. This would probably result in very good scores using BERTs transfer learning structure. However, we found the transformer architecture and attention mechanism very complex to understand. Altough it is easy to implement a solution applying a small BERT model in code, we would not be able to understand how it works. 
+We heavily considered using BERT for the whole pipeline. This would probably result in very good scores using BERTs transfer learning structure. However, we found the transformer architecture and attention mechanism very complex to understand. Although it is easy to implement a solution applying a small BERT model in code, we would not be able to understand how it works. 
 
-Another approach is to use a LLM like gpt-3. This would result in even better scores, but the same problem as with BERT applies. We would not be able to understand how it works. Using a LLM would also be very expensive, as we would have to pay for the API.
+Another approach is to use a LLM like gpt-3. This would result in even better scores, but the same problem as with BERT applies. We would not be able to understand how it works. Using a LLM would also be very expensive in terms of computational power, and may be overkill for this task.
 
 ### Pipeline Design
 
