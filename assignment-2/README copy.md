@@ -214,15 +214,32 @@ The mention count has a similar distribution for both disaster and non-disaster 
 ![Alt text](image-1.png)
 The url count has quite a large difference between disaster and non-disaster tweets. We can see that the majority of disaster-related tweets contain a url, whilst the majority of non-disaster tweets do not contain a url. This is of course not enough to conclude that the tweet is disaster-related, but it might be a useful feature.
 
-## 4. Modelling
-## 4.1 Logistic regression
+## 4. Implement basic modelling methods
+
+Before implementing any particular basic modelling method, we vectorized the features. In particular, we used `TfidfVectorizer`, which is equivalent to using `CountVectorizer`, followed by `TfidfTransformer`. Using `TfidfVectorizer` converts a collection of features to a matrix of TF-IDF features.
+
+We used TF-IDF vectorization for the following reasons:
+
+- **Dimensionality Reduction**. Raw text data is highly dimensional, as each unique word or token can be a dimension. By using TF-IDF, the importance of each word is quantified, allowing for potential dimensionality reduction by removing words with very low TF-IDF scores, as they are likely to be less informative.
+
+- **Normalization**. The TF-IDF score balances out the term frequency (TF) with its inverse document frequency (IDF). This means that words that appear frequently in a single document but not in many documents throughout the corpus will get a high score. On the other hand, common words that appear frequently in many documents (like "and", "the", etc.) will get a low score. This normalization process ensures that less emphasis is placed on common words that do not carry much meaningful information.
+
+- **Clean code**. Using `TfidfVectorizer` is equivalent to using `CountVectorizer` followed by `TfidfTransformer`. By using the `TfidfVectorizer`, you combine these two steps, which can be more efficient and require less code.
+
+Next, the data was split into a train and test set, with a test size of `0.3`.
+
+### 4.1. Based on the selected features
+
+#### 4.1.1. Logistic regression
+
 The first basic modelling method used was logistic regression. Logistic regression was chosen due to the following reasons:
 
 - **Binary Outcome**. The target variable (`target`) is binary, with values either `0` (Not Relevant) or `1` (Relevant). Logistic regression is designed to model the probability of a binary outcome, making it a suitable choice for this dataset.
 
 - **Linear Decision Boundary**. Logistic regression assumes a linear relationship between the log-odds of the outcome and the predictor variables. If the relationship between the vectorized text features and the target variable is approximately linear in the log-odds space, logistic regression will perform well.
 
-### Results
+##### Results of logistic regression
+
 The logistic regression model achieved an accuracy of approximately 91.03% on the test dataset. Analyzing the classification report, we observe the following details for each class:
 
 For class `0` (Not Relevant):
@@ -244,14 +261,8 @@ Inspecting the confusion matrix:
 - 806 instances were correctly classified as class `0`, while 41 instances were incorrectly predicted as class `0` when they were actually class `1`.
 - Conversely, 554 instances were correctly labeled as class `1`, but 93 instances were wrongly classified as class `1` when they were in fact class `0`.
 
-#### Hyperparameter tuning
-For hyperparameter tuning, we used `GridSearchCV` to find the optimal hyperparameters for each model.
+#### 4.1.2. Support Vector Machine (SVM)
 
-For logistic regression, we performed a grid search to identify the optimal combination of hyperparameters. We considered varying levels of regularization strength by adjusting the `C` parameter. The type of penalization was alternated between `l1` and `l2` using the `penalty` parameter. Additionally, different optimization algorithms were tested using the `solver` parameter, including `liblinear` and `saga`. The grid search cross-validated the model's performance for each combination.
-
-The accuracy obtained after hyperparameter tuning (approximately 91.36%) is **slightly higher** than the accuracy from the initial logistic regression model, which was around 91.03%. In particular, it was the change of `C` and `lbfgs` parameter: from `C=1.0` to `C=2.0` and from `lbfgs` to `liblinear`. The hyperparameter tuning process for logistic regression managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
-
-## 4.2. Support Vector Machine (SVM)
 The second basic modelling method used was a support vector machine (SVM). SVM were chosen due to the following reasons:
 
 - **High Dimensionality**. Text data, when transformed into a numerical format like TF-IDF or Count Vectorization, often results in a high-dimensional feature space, as each unique word or token becomes a dimension. SVMs are designed to handle high-dimensional data effectively.
@@ -260,7 +271,40 @@ The second basic modelling method used was a support vector machine (SVM). SVM w
 
 - **Clear margin of separation**. SVMs aim to find the hyperplane that has the maximum margin between two classes. This often results in better generalization to unseen data, reducing the risk of overfitting.
 
-#### Hyperparameter tuning
+##### Results of support vector machine
+
+The Support Vector Machine model achieved an accuracy of approximately 91.43% on the test dataset. Delving deeper into the classification report, we can discern the following details for each class:
+
+For class `0` (Not Relevant):
+
+- **Precision**: Of all the instances the model predicted as class `0`, 91% were correctly identified.
+- **Recall**: Out of all the true instances of class `0` in the test set, the model successfully classified 94% of them.
+- **F1-Score**: The F1-score for this class is recorded at 93%.
+
+For class `1` (Relevant):
+
+- **Precision**: The model was accurate in predicting 92% of the instances as class `1`.
+- **Recall**: It managed to detect 88% of the actual instances of class `1`.
+- **F1-Score**: The F1-score for this class is recorded at 90%.
+
+Zooming out to a more generalized view, the macro average indicates an average precision, recall, and F1-score of approximately 92%, 91%, and 91% respectively. The weighted average indicates an average precision, recall, and F1-score all rounding to about 91%.
+
+Examining the confusion matrix:
+
+- The model correctly classified 799 instances as class `0`, while mistakenly predicting 48 instances as class `0` which were actually class `1`.
+- On the other hand, 567 instances were accurately labeled as class `1`. However, 80 instances were incorrectly classified as class `1` when they truly belonged to class `0`.
+
+### 4.2. With hyperparameter tuning
+
+For hyperparameter tuning, we used `GridSearchCV` to find the optimal hyperparameters for each model.
+
+#### 4.2.1. Logistic regression
+
+For logistic regression, we performed a grid search to identify the optimal combination of hyperparameters. We considered varying levels of regularization strength by adjusting the `C` parameter. The type of penalization was alternated between `l1` and `l2` using the `penalty` parameter. Additionally, different optimization algorithms were tested using the `solver` parameter, including `liblinear` and `saga`. The grid search cross-validated the model's performance for each combination.
+
+The accuracy obtained after hyperparameter tuning (approximately 91.36%) is **slightly higher** than the accuracy from the initial logistic regression model, which was around 91.03%. In particular, it was the change of `C` and `lbfgs` parameter: from `C=1.0` to `C=2.0` and from `lbfgs` to `liblinear`. The hyperparameter tuning process for logistic regression managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
+
+#### 4.2.2. Support Vector Machine (SVM)
 
 For the SVM, the regularization parameter `C` was adjusted to analyze the decision boundary. We explored different types of kernels using the `kernel` parameter, including `linear` and `rbf`. The coefficient for the kernel function, `gamma`, was also tuned, toggling between `scale` and `auto`. The grid search cross-validated the model's performance for each combination.
 
@@ -285,11 +329,6 @@ The accuracy obtained after hyperparameter tuning (approximately 91.63%) is **sl
 - **Kernel Coefficient (`gamma`)**. Adjusting `gamma` can help control the shape and complexity of the decision boundary, impacting the model's generalization capability.
 
 In summary, hyperparameter tuning for both Logistic Regression and SVM involves adjusting key parameters that control model complexity, regularization, and the nature of the decision boundary. The goal is to find the optimal combination of hyperparameters that results in the best performance on unseen data, ensuring that the model is both accurate and generalizable.
-
-
-### 4.3.1. Logistic regression
-### 4.3.2. Support Vector Machine (SVM)
-
 
 ## 5. Comparing modelling methods
 
