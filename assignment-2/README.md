@@ -143,22 +143,19 @@ Most common trigrams in non-disaster tweets:
 We implemented sentiment analysis to investigate if the sentiment of the tweet would be relevant to classifying the tweet as disaster-related or not. We did this using the `SentimentIntensityAnalyzer` from `nltk`:
 
 ```py
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 def analyze_sentiment_vader(text):
     analyzer = SentimentIntensityAnalyzer()
     sentiment_scores = analyzer.polarity_scores(text)
-    if sentiment_scores['compound'] >= 0.05:
-        return "Positive"
-    elif sentiment_scores['compound'] <= -0.05:
-        return "Negative"
-    else:
-        return "Neutral"
+    return sentiment_scores['compound']
 
-df['sentiment'] = df['cleaned_text'].apply(analyze_sentiment_vader)
+df['sentiment'] = df['text'].apply(analyze_sentiment_vader)
+df_test['sentiment'] = df_test['text'].apply(analyze_sentiment_vader)
+
+df.sentiment.head()
 
 ```
 
-Based on this code, it seemed like it was a significant difference in the sentiment between the disaster-related and not disaster-related tweets. We then looked at the counts for each sentiment, and saw there was a distribution imbalance where the majority of disaster-related tweets had a negative sentiment, whilst there was way more positive sentiment amongst the "non-disaster-related" tweets. 
+Based on the code below, it seemed like it was a significant difference in the sentiment between the disaster-related and not disaster-related tweets. We then looked at the counts for each sentiment, and saw there was a distribution imbalance where the majority of disaster-related tweets had a negative sentiment, whilst there was way more positive sentiment amongst the "non-disaster-related" tweets. 
 
 We also tested with "text" instead of "cleaned_text" and the results were still the same (significant difference).
 
@@ -167,11 +164,8 @@ We also tested with "text" instead of "cleaned_text" and the results were still 
 
 from scipy import stats
 
-
-df['sentiment_numeric'] = df['sentiment'].map({'Negative': 0, 'Neutral': 1, 'Positive': 2})
-
-disaster_group = df[df['target'] == 1]['sentiment_numeric']
-not_disaster_group = df[df['target'] == 0]['sentiment_numeric']
+disaster_group = df[df['target'] == 1]['sentiment']
+not_disaster_group = df[df['target'] == 0]['sentiment']
 
 t_statistic, p_value = stats.ttest_ind(disaster_group, not_disaster_group, equal_var=False)
 
@@ -291,11 +285,17 @@ In summary, hyperparameter tuning for both Logistic Regression and SVM involves 
 
 > TODO: Write a paragraph about the comparison of the modelling methods.
 
-### 5.1. Selecting the modelling methods
+### 5.1. Selecting  two performance metrics
 
+- accuracy
+- f1 scores
+
+(Lim inn bilder)
 ...
 
-### 5.2. Reasoning
+### 5.2. Why they perform similar
+
+They perform similar because
 
 ...
 
