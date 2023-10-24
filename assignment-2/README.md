@@ -16,20 +16,16 @@ Moreover, we removed duplicated rows with regards to the `text` column, as outli
 
 ## 2. Extract features
 
-We use td-idf vectorization to extract features from the text. Semantic features of the text that are not captured by tf-idf are:
-1. The length of the text
-2. The number of hashtags
-
 ### 2.1 Text feature
-Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. In this delivery we have chosen to do this this by using tf-idf vectorization. TD-IDF, or term frequency–inverse document frequency, is a common technique for extracting features from text. 
+Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. In this delivery we have chosen to do this this by using tf-idf vectorization. 
 
-TF-IDF is an extenstion of the bag-of-words model.A bag-of-words is a representation of text that describes the occurrence of words within a document. TF-IDF contains information about the frequency of words in a document, but also how important the word is in the context of the entire corpus. The importance of a word increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus. This means that words that appear frequently in a single document but not in many documents throughout the corpus will get a high score. On the other hand, common words that appear frequently in many documents (like "and", "the", etc.) will get a low score. This normalization process ensures that less emphasis is placed on common words that do not carry much meaningful information.
+TD-IDF, or term frequency–inverse document frequency, is an extenstion of the bag-of-words model. The bag-of-words algorithm represents a document by the occurrence of words within a it. You first build a vocabulary by looking at the set of all words used in the corpus. The amount of words in the vocabulary maps directly to the number of features it produces for a given document. The result of embedding a document with bag-of-words is simply a one hot encoding of the ocurrences of the words in the vocabulary in the document.
 
-The vectorization is done using the `TfidfVectorizer` from `sklearn.feature_extraction.text`. The `TfidfVectorizer` converts a collection of raw documents to a matrix of TF-IDF features. The `TfidfVectorizer` is equivalent to using `CountVectorizer` followed by `TfidfTransformer`. Using the `TfidfVectorizer` is more efficient and requires less code.
+TF-IDF extends the bag-of-words model by also including how important a word is in the context of the entire corpus. The importance of a word increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus. This means that words that appear frequently in a single document but not in many documents throughout the corpus will get a high score. On the other hand, common words that appear frequently in many documents (like "and", "the", etc.) will get a low score. This normalization process ensures that less emphasis is placed on common words that do not carry much meaningful information.
 
-However, by converting the text into a numerical representation, we lose a lot of information. For example, the order of the words is lost. TF-IDF is also not able to capture the semantic meaning of the words. For example, the words "good" and "bad" are opposites, but TF-IDF does not capture this.
+The implementation is done using the `TfidfVectorizer` from `sklearn.feature_extraction.text`. The `TfidfVectorizer` converts a collection of raw documents to a matrix of TF-IDF features. The `TfidfVectorizer` is equivalent to using `CountVectorizer` followed by `TfidfTransformer`. Using the `TfidfVectorizer` is more efficient and requires less code.
 
-To combat this, we try to extract some additional features from the text. These features are:
+However, by converting the text into a numerical representation, we lose a lot of information. For example, the order of the words is lost. TF-IDF is also not able to capture the semantic meaning of the words.  To combat this, we try to extract some additional features from the text. 
 
 ### 2.1. Text length
 
