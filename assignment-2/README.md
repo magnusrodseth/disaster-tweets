@@ -1,6 +1,6 @@
 # IT3212 - Assignment 2
 
-Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Czternasty Hembre, Max Gunhamn, Sebastian Sole, and Magnus Rødseth.
+Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Czternasty Hembre, Max Gunhamn, Sebastian Sole, and Magnus Rødseth. 
 
 ## 1. Implement the preprocessing
 
@@ -10,7 +10,7 @@ Next, we preprocessed the textual data. We cleaned up the `keyword` column, ensu
 
 Furthermore, we cleaned the `text` column. The first part of this included removing links, line breaks, extra spaces, special characters and punctuation. Next, we removed English stopwords. Finally, we lemmatized the text.
 
-When handling categorical data, we removed rows with a `choose_one` value of `Can't decide`, according to what was outlined in assignment 1. Next, we mapped the `choose_one` values `Relevant` and `Not Relevant` to `1` and `0`, respectively. This was stored in a new feature, called `target`.
+When handling categorical data, we removeds rows with a `choose_one` value of `Can't decide`, according to what was outlined in assignment 1. Next, we mapped the `choose_one` values `Relevant` and `Not Relevant` to `1` and `0`, respectively. This was stored in a new feature, called `target`.
 
 Moreover, we removed duplicated rows with regards to the `text` column, as outlined in assignment 1.
 
@@ -308,29 +308,29 @@ In summary, hyperparameter tuning for both Logistic Regression and SVM involves 
 
 > Apart from that, design (not develop) your pipeline based on one Advanced modelling techniques. Justify your choices (10%).
 
-The advanced modelling technique we have chosen are Word2Vec embeddings coupled with a Random Forest classifier. Both Word2Vec and Random Forest are relatively simple models that are easy to implement and interpret. 
+The advanced modelling technique we have chosen are Word2Vec embeddings coupled with a Random Forest classifier. Both Word2Vec and Random Forest are relatively simple models that are easy to implement and interpret. This makes them suitable for this project.
 
 ### Word2Vec
-Word2Vec is an example of transfer learning. Word2Vec captures the semantic meaning of a word by representing it based on the context the word appears. The assumption is that words with similar meanings appear in similar contexts. This means words with similar meanings will have embeddings that are close in the vector space.
+Word2vec is a technique for natural language processing from 2013. The word2vec algorithm uses a neural network model to learn word associations from a large corpus of text. Once trained, it can detect synonymous words or suggest additional words for a partial sentence. In the same way as tf-idf (our current approach), word2vec represents each document with a vector. The vectors are chosen such that they capture the semantic and syntactic qualities of the words.
 
-There exists many similar models to Word2Vec, such as Glove, FastText, Universal Sentence Encoder and BERT by Google. We chose Word2Vec because it is a simple and intuitive approach.
+We will use the library `gensim` to train a Word2Vec model on a large corpus of text. Then, we will use the pre-trained model to generate embeddings for each tweet in our dataset. The embeddings will be used as features in our Random Forest classifier.
 
-**Notes**
-- FastText generates embeddings for subwords, so even if a word hasn't been seen during training, it can create a representation for it based on its subwords. This feature can be particularly useful for tweets, which often have misspellings, abbreviations, and neologisms.
+There exists many similar models to Word2Vec, such as Glove, FastText, Universal Sentence Encoder and BERT by Google. We chose Word2Vec because it is simple compared to the alternatives, and it is still a big step up from tf-idf.
 
 ### Random Forest Classifier
-The Random Forest classifier is a simple yet powerful ensemble learning method. It is an ensemble of decision trees, where each tree is trained on a random subset of the training data. The final prediction is made by aggregating the predictions of all the trees. Random Forests are robust to overfitting and can handle high-dimensional data effectively.
+The Random Forest classifier is an ensemble learning method. It is an ensemble of decision trees, where each tree is trained on a random subset of the training data. The final prediction is made by aggregating the predictions of all the trees. Random Forests are robust to overfitting and can handle high-dimensional data effectively.
 
-Random Forest is a machine learning algorithm that is based on combining multiple decision trees into one model. These are two important techniques it uses:
+These are two important techniques the algorithm uses:
 
 Bagging (Bootstrap Aggregating): For each tree, a random sample of the data is drawn with replacement, creating diverse sets of training data. This process introduces variability among the trees, ensuring individual trees are trained on slightly different versions of the data.
 Feature Randomness: During tree construction, instead of considering all features for a split, a random subset of features is chosen. This adds another layer of randomness and reduces the correlation between individual trees.
 
-**Notes**
 Similarly to the reason we chose Word2Vec, we chose Random Forest because it is a simple and intuitive approach compared to other ensemble methods like XGBoost or neural networks.
 
-### Side note about BERT
-We heavily considered using BERT for the whole pipeline. This would probably result in very good scores using BERTs transfer learning structure. However, we found the transformer architecture and attention mechanism very complex to understand. Altough it is easy to implement a solution applying a small BERT model in code, we would not be able to understand how it works.
+### Side note about transformer models
+We heavily considered using BERT for the whole pipeline. This would probably result in very good scores using BERTs transfer learning structure. However, we found the transformer architecture and attention mechanism very complex to understand. Altough it is easy to implement a solution applying a small BERT model in code, we would not be able to understand how it works. 
+
+Another approach is to use a LLM like gpt-3. This would result in even better scores, but the same problem as with BERT applies. We would not be able to understand how it works. Using a LLM would also be very expensive, as we would have to pay for the API.
 
 ### Pipeline Design
 
@@ -342,19 +342,16 @@ Similar to the previous pipeline, we start by importing the necessary data.
 
 We clean the tweets like the current pipeline.
 
-**Word Embeddings with Word2Vec:**
+**Feature extraction using Word2Vec:**
 
-Instead of using tf-idf vectorization, we use Word2Vec to generate word embeddings for each tweet. This is a more sophisticated approach that capture the semantic meaning of words.
+Instead of using tf-idf vectorization, we use Word2Vec to generate word embeddings for each tweet.  We will first pre-trained a Word2Vec model on a large document corpus using the `gensim`-library. Then, we will use the pre-trained model to generate embeddings for each tweet in our dataset.
 
-We will first pre-trained a Word2Vec model on a large document corpus using the `gensim`-library. Then, we will use the pre-trained model to generate embeddings for each tweet in our dataset.
+**Modelling using a Random Forest Classifier:**
 
-**Training a Random Forest Classifier:**
-
-Train a Random Forest classifier on the Word2Vec embeddings from the training set. Fine-tune the hyperparameters of the classifier to achieve the best possible performance.
+Train a Random Forest classifier on the Word2Vec embeddings from the training set. 
 
 **Evaluation:**
-
-Use the trained Random Forest model to classify tweets in the test set. Evaluate the model's performance using F1-score.
+Use the trained Random Forest model to classify tweets in the test set. Evaluate the model's performance using F1-score. Fine-tune the hyperparameters of the classifier using grid search to achieve the best possible performance.
 
 
 
