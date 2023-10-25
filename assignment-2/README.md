@@ -16,7 +16,9 @@ Moreover, we removed duplicated rows with regards to the `text` column, as outli
 
 ## 2. Extract features
 
-### Text feature
+The raw columns in the dataset we are working with are the text column and the keyword column. Here we will explain how we extract features from these columns.
+
+### Text
 Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. The following methods were used to extract features from the text
 
 #### TF-IDF
