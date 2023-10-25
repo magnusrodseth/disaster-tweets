@@ -16,10 +16,10 @@ Moreover, we removed duplicated rows with regards to the `text` column, as outli
 
 ## 2. Extract features
 
-## Text feature
+### Text feature
 Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. The following methods were used to extract features from the text
 
-### TF-IDF
+#### TF-IDF
 TD-IDF, or term frequency–inverse document frequency, is an extenstion of the bag-of-words model. The bag-of-words algorithm represents a document by the occurrence of words within a it. You first build a vocabulary by looking at the set of all words used in the corpus. The amount of words in the vocabulary maps directly to the number of features it produces for a given document. The result of embedding a document with bag-of-words is simply a one hot encoding of the ocurrences of the words in the vocabulary in the document.
 
 TF-IDF extends the bag-of-words model by also including how important a word is in the context of the entire corpus. The importance of a word increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus. This means that words that appear frequently in a single document but not in many documents throughout the corpus will get a high score. On the other hand, common words that appear frequently in many documents (like "and", "the", etc.) will get a low score. This normalization process ensures that less emphasis is placed on common words that do not carry much meaningful information.
@@ -28,11 +28,11 @@ The implementation is done using the `TfidfVectorizer` from `sklearn.feature_ext
 
 However, by converting the text into a numerical representation, we lose a lot of information. For example, the order of the words is lost. TF-IDF is also not able to capture the semantic meaning of the words.  To combat this, we try to extract some additional features from the text. 
 
-### Text length
+#### Text length
 
 TF-IDF does not capture the length of a given document. A hypotheses might be that disaster-related tweets are longer than non-disaster related tweets. We extract the length of the text in characters and use it as a feature.
 
-### Counting hashtags
+#### Counting hashtags
 
 Hashtag counts were extracted, as we suspected tweets related to a disaster might contain more hashtags than a tweet which does not. 
 ```py
@@ -40,7 +40,7 @@ Hashtag counts were extracted, as we suspected tweets related to a disaster migh
 df['hashtag_count'] = df['text'].apply(lambda x: len([c for c in str(x) if c == '#']))
 ```
 
-### Counting mentions
+#### Counting mentions
 
 The `mention_count` is a feature where we see how many mentions there are in a tweet. This means how many other twitter users are mentioned in the tweet.
 This was extracted because we thought there might be a connection betweeen how many users were tagged and if the tweets are disaster-related. The group thought that disaster-related tweets would have more mentions than tweets that were not disaster related.
@@ -51,7 +51,7 @@ This was extracted because we thought there might be a connection betweeen how m
 df['mention_count'] = df['text'].apply(lambda x: len([c for c in str(x) if c == '@']))
 ```
 
-### Checking if the tweet contains a url
+#### Checking if the tweet contains a url
 
 The `has_url` feature was extracted because tweets related to a disaster might point to an online resource where one can find more information about the situation. The column is `1` if the tweet contains a url and `0` if not. The `has_url` feature had to be done before preprocessing, as we remove links in the preprocessing step.
 
@@ -61,7 +61,7 @@ The `has_url` feature was extracted because tweets related to a disaster might p
 df['has_url'] = df['text'].apply(lambda x: 1 if 'http' in str(x) else 0)
 ```
 
-### N-grams
+#### N-grams
 
 When using TF-IDF on the raw text, you loose all the semantic meaning of how the words are used in the text. For example, the sentence "I love you" and "You love I" would have the same TF-IDF representation, even though the meaning of the sentences are different. However, if you add trigrams to the text, we can capture them as two distinct features. This is because the trigrams "I love you" and "You love I" are different.
 
@@ -143,7 +143,7 @@ Most common trigrams in non-disaster tweets:
 [(('liked', 'youtube', 'video'), 32), (('i', 'am', 'going'), 18), (('pick', 'fan', 'army'), 18), (('cross', 'body', 'bag'), 17), (('reddits', 'new', 'content'), 11), (('new', 'content', 'policy'), 11), (('low', 'selfimage', 'take'), 10), (('selfimage', 'take', 'quiz'), 10), (('deluged', 'invoice', 'make'), 10), (('likely', 'rise', 'top'), 10)]
 ```
 
-### Sentiment analysis
+#### Sentiment analysis
 
 We implemented sentiment analysis to investigate if the sentiment of the tweet would be relevant to classifying the tweet as disaster-related or not. We did this using the `SentimentIntensityAnalyzer` from `nltk`:
 
@@ -181,13 +181,18 @@ else:
     print("There is no significant difference in sentiment between disaster and not disaster tweets.")
 ```
 
+### Keyword column
+
+The keyword feature is important becausee it is the word from the text that may have the strongest correlation to the target. To extract features from it, we encode it using the same tf-ifd method. This way, the model can fit to these features if it sees a strong correlation between the keyword and the target.
+
 ## 3. Select features
 
 These are the raw features we have extracted that the model is able to use out of the box that we have to choose from:
 
 | Feature        | Description                                  | Selected |
 |----------------|----------------------------------------------|----------|
-| keyword        | Specific keyword associated with the text.   | Yes      |
+| set of words from keyword column        | The extracted features from the keyword column   | Yes      |
+| set of words from text + ngrams        | The extracted features from the text column (including n-grams)   | Yes      |
 | has_url        | Boolean indicating if the text has a URL.    | Yes      |
 | sentiment      | Sentiment value of the text.                 | Yes      |
 | text_length    | The length of the text in characters.        | No       |
@@ -369,10 +374,6 @@ We chose to look at f1-scores as f1-scores incorporates both precision and recal
 ### 5.2. Why they perform similar
 
 SVM and logistic regression exhibit similar performance for several reasons. These algorithms are considered relatively simple when compared to more complex machine learning techniques. They do not inherently capture complex, nonlinear relationships between features, in contrast to neural networks, which are designed to model intricate feature interactions. As a result, their similarities in performance can be attributed to their linear nature and a focus on individual feature contributions.
-
-
-
-...
 
 ## 6. Designing a pipeline
 
