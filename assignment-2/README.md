@@ -180,14 +180,14 @@ else:
 
 These are the raw features we have extracted that the model is able to use out of the box that we have to choose from:
 
-| Feature        | Type | Description                                |
-|----------------|------|--------------------------------------------|
-| keyword        | ?    | Specific keyword associated with the text. |
-| text_length    | ?    | The length of the text in characters.      |
-| hashtag_count  | ?    | Number of hashtags used in the text.       |
-| mention_count  | ?    | Number of mentions (@) in the text.        |
-| has_url        | ?    | Boolean indicating if the text has a URL.  |
-| sentiment      | ?    | Sentiment value of the text.               |
+| Feature        | Description                                |
+|----------------|--------------------------------------------|
+| keyword        | Specific keyword associated with the text. |
+| text_length    | The length of the text in characters.      |
+| hashtag_count  | Number of hashtags used in the text.       |
+| mention_count  | Number of mentions (@) in the text.        |
+| has_url        | Boolean indicating if the text has a URL.  |
+| sentiment      | Sentiment value of the text.               |
 
 **Length of the text**: **not selected**
 ![Alt text](image-4.png)
@@ -234,6 +234,7 @@ We trained the models on the training set using 5-fold cross-validation. The rea
 To tune our models we use grid search. Grid search is a technique for finding the optimal combination of hyperparameters for a given model. The reason for using grid search is that it is a simple and effective way of testing which parameters make the model perform the best. The downside of grid search is that it is computationally expensive. However, since we are only tuning a few hyperparameters, the computational cost is not too high.
 
 ## 4.1 Logistic regression
+### 4.1.1 About the model
 The first basic modelling method used was logistic regression. Logistic regression was chosen due to the following reasons:
 
 **Binary Classification:** Logistic Regression models probability of output in terms of input, so by introducing a threshold value it can be used as a classifier which fits our binary classification problem.
@@ -244,14 +245,14 @@ The first basic modelling method used was logistic regression. Logistic regressi
 
 **Proven Track Record:** Logistic Regression is a classic. Its longstanding reputation in the domain ensures that it's a tried-and-tested method to begin with.
 
-### Hyperparameter tuning
+### 4.1.2 Hyperparameters
 These are the hyperparameters we tuned for logistic regression:
 
 - `C`: Varying levels of regularization (default = 1.0)
 
-### Results
+### 4.1.3 Modelling results
 
-#### Stock model (no tuning)
+#### 4.1.3.1 Stock model (no tuning)
 
 **Validation result (5-fold cross-validation):**
 | Label | Precision | Recall | F1-Score |
@@ -270,7 +271,7 @@ Overall accuracy: 0.85
 
 Overall accuracy: 0.79
 
-### Results after hyperparameter tuning
+#### 4.1.3.2 Results after hyperparameter tuning
 
 We got the best results with the following hyperparameters:
 
@@ -308,6 +309,8 @@ This plot shows the top 50 features that have the highest coefficients from the 
 ![Alt text](image-6.png)
 
 ## 4.2. Support Vector Machine (SVM)
+
+### 4.2.1 About the model
 The second basic modelling method used was a support vector machine (SVM). SVM were chosen due to the following reasons:
 
 - **High Dimensionality**. Text data, when transformed into a numerical format like TF-IDF or Count Vectorization, often results in a high-dimensional feature space, as each unique word or token becomes a dimension. SVMs are designed to handle high-dimensional data effectively.
@@ -316,15 +319,7 @@ The second basic modelling method used was a support vector machine (SVM). SVM w
 
 - **Clear margin of separation**. SVMs aim to find the hyperplane that has the maximum margin between two classes. This often results in better generalization to unseen data, reducing the risk of overfitting.
 
-#### Hyperparameter tuning
-
-For the SVM, the regularization parameter `C` was adjusted to analyze the decision boundary. We explored different types of kernels using the `kernel` parameter, including `linear` and `rbf`. The coefficient for the kernel function, `gamma`, was also tuned, toggling between `scale` and `auto`. The grid search cross-validated the model's performance for each combination.
-
-The accuracy obtained after hyperparameter tuning (approximately 91.63%) is **slightly higher** than the accuracy from the initial SVM model, which was around 91.43%. In particular, it was the change of `kernel` parameter: from `linear` to `rbf`. The hyperparameter tuning process for SVM managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
-
-### 4.3. Explaining the reasoning behind the hyperparameter tuning
-
-#### 4.3.1. Logistic regression
+### 4.2.2 Hyperparameters
 
 - **Regularization (`C`)**. The hyperparameter `C` is the inverse of regularization strength. Smaller values of `C` indicate stronger regularization, which can prevent overfitting, but might also lead to underfitting if too strong. On the other hand, larger values of `C` mean weaker regularization, which might fit the training data more closely but risk overfitting. By tuning `C`, we aim to strike the right balance between underfitting and overfitting.
 
@@ -332,7 +327,9 @@ The accuracy obtained after hyperparameter tuning (approximately 91.63%) is **sl
 
 - **Solver (`solver`)**. The `solver` parameter dictates the optimization algorithm to be used. Different solvers might converge at different rates and can have varying levels of accuracy, depending on the nature of the data and the problem. Some solvers work better with certain penalty types, making it important to consider the combination of `solver` and `penalty` when tuning the model.
 
-#### 4.3.2. Support Vector Machine (SVM)
+For the SVM, the regularization parameter `C` was adjusted to analyze the decision boundary. We explored different types of kernels using the `kernel` parameter, including `linear` and `rbf`. The coefficient for the kernel function, `gamma`, was also tuned, toggling between `scale` and `auto`. The grid search cross-validated the model's performance for each combination.
+
+The accuracy obtained after hyperparameter tuning (approximately 91.63%) is **slightly higher** than the accuracy from the initial SVM model, which was around 91.43%. In particular, it was the change of `kernel` parameter: from `linear` to `rbf`. The hyperparameter tuning process for SVM managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
 
 - **Regularization (`C`)**. Like in Logistic Regression, the `C` parameter in SVM controls the trade-off between obtaining a wider margin and classifying the training points correctly. A smaller `C` creates a wider margin, which might misclassify more points, while a larger `C` results in a narrower margin, making the model fit more closely to the training data. Adjusting `C` helps balance between overfitting (high variance) and underfitting (high bias).
 
@@ -340,12 +337,11 @@ The accuracy obtained after hyperparameter tuning (approximately 91.63%) is **sl
 
 - **Kernel Coefficient (`gamma`)**. Adjusting `gamma` can help control the shape and complexity of the decision boundary, impacting the model's generalization capability.
 
-In summary, hyperparameter tuning for both Logistic Regression and SVM involves adjusting key parameters that control model complexity, regularization, and the nature of the decision boundary. The goal is to find the optimal combination of hyperparameters that results in the best performance on unseen data, ensuring that the model is both accurate and generalizable.
+### 4.2.3 Modelling results
 
-
-### 4.3.1. Logistic regression
-### 4.3.2. Support Vector Machine (SVM)
-
+> TODO: skrive
+#### Stock model (no tuning)
+#### Results after hyperparameter tuning
 
 ## 5. Comparing modelling methods
 
