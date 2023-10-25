@@ -194,9 +194,11 @@ These are the hyperparameters we tuned for logistic regression:
 
 ### 4.1.3 Modelling results
 
-#### 4.1.3.1 Stock model (no tuning)
+
+#### Stock model with default params
 
 **Validation result (5-fold cross-validation):**
+
 | Label | Precision | Recall | F1-Score |
 |-------|-----------|--------|----------|
 | 0     | 0.86      | 0.90   | 0.88     |
@@ -206,6 +208,7 @@ Overall accuracy: 0.85
 
 
 **Test result**
+
 | Label | Precision | Recall | F1-Score |
 |-------|-----------|--------|----------|
 | 0     | 0.78      | 0.87   | 0.82     |
@@ -214,12 +217,13 @@ Overall accuracy: 0.85
 Overall accuracy: 0.79
 
 _Confusion Matrix for Testing:_
+
 | Actual \ Predicted | Predicted 0 | Predicted 1 |
 |--------------------|-------------|-------------|
 | Actual 0           | 3393        | 202         |
 | Actual 1           | 371         | 1929         |
 
-#### 4.1.3.2 Results after hyperparameter tuning
+#### Results after hyperparameter tuning
 
 We got the best results with the following hyperparameters:
 
@@ -244,7 +248,8 @@ Overall Train Accuracy: 0.9028
 
 Overall Test Accuracy: 0.7955
 
-Confusion Matrix for Testing:  
+_Confusion Matrix for Testing:_
+
 | Actual \ Predicted | Predicted 0 | Predicted 1 |
 |--------------------|-------------|-------------|
 | Actual 0           | 1056        | 163         |
@@ -314,7 +319,8 @@ Confusion Matrix for Training:
 
 Overall Test Accuracy: 0.7992
 
-Confusion Matrix for Testing:  
+_Confusion Matrix for test:_
+
 | Actual \ Predicted | Predicted 0 | Predicted 1 |
 |--------------------|-------------|-------------|
 | Actual 0           | 1065        | 154         |
@@ -334,10 +340,6 @@ Using grid search we found that from the values 0.001, 0.01 of C, 0.001 was bett
 
 Overall Train Accuracy: 0.6098
 
-Confusion Matrix for Training:  
-[[3595, 0],  
-[2300, 0]]
-
 **Test result**
 
 | Label | Precision | Recall | F1-Score | Support |
@@ -347,14 +349,12 @@ Confusion Matrix for Training:
 
 Overall Test Accuracy: 0.5602
 
-Confusion Matrix for Testing:  
+_Confusion Matrix for Testing:_
+
 | Actual \ Predicted | Predicted 0 | Predicted 1 |
 |--------------------|-------------|-------------|
 | Actual 0           | 1219        | 0           |
 | Actual 1           | 957         | 0           |
-
-### 4.3 Interpreting the results
-> TODO: vi burde serriøst skrive noe om hva vi tenker om resultatene. Gir de mening, er det gode resultater, osv osv
 
 ## 5. Comparing modelling methods
 
@@ -421,19 +421,21 @@ Henrik Skog: Plotting, preprocessing, feature extraction, modelling, pipeline de
 
 Max Gunhamn: Report writing, proofreading.
 
-...
+Haakon Tideman Kanter: Feature extraction, report writing, modelling, proofreading, comparing modelling methods, report writing
+
+Sebastian Sole: Pipeline design, report writing
+
+Magnus Rødseth: Modelling, preprocessing, report writing
+
+Mattis Czternasty Hembre: Report writing, proofreading
 
 ## 8. Personalized feedback form
 
-1. Feature extraction: (YES/NO)
-2. Feature selection: (YES/NO)
-3. Choice of basic modelling methods: (YES/NO)
-4. Choice of performance metrics: (YES/NO)
-5. Comparison of modelling methods: (YES/NO)
-6. Advanced Pipeline Design: (YES/NO)
+1. Feature extraction: (YES)
+2. Feature selection: (YES)
+3. Choice of basic modelling methods: (NO)
+4. Choice of performance metrics: (NO)
+5. Comparison of modelling methods: (YES)
+6. Advanced Pipeline Design: (YES)
 
 ### 8.1. Other questions
-
-> TODO: Add other quesions if they arise
-
-## 9
