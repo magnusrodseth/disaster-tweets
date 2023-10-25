@@ -285,17 +285,24 @@ In summary, hyperparameter tuning for both Logistic Regression and SVM involves 
 
 > TODO: Write a paragraph about the comparison of the modelling methods.
 
-### 5.1. Selecting  two performance metrics
+### 5.1. Selecting  two performance metrics and comparing modelling methods
 
 - accuracy
+  
+Used accuracy as a general metric to determine how precise our model was. 
+
 - f1 scores
+
+We chose to look at f1-scores as f1-scores incorporates both precision and recall. 
 
 (Lim inn bilder)
 ...
 
 ### 5.2. Why they perform similar
 
-They perform similar because
+SVM and logistic regression exhibit similar performance for several reasons. These algorithms are considered relatively simple when compared to more complex machine learning techniques. They do not inherently capture complex, nonlinear relationships between features, in contrast to neural networks, which are designed to model intricate feature interactions. As a result, their similarities in performance can be attributed to their linear nature and a focus on individual feature contributions.
+
+
 
 ...
 
