@@ -12,16 +12,18 @@ Furthermore, we cleaned the `text` column. The first part of this included remov
 
 Finally, we lemmatized the text. Lemmatization is the process of reducing words to their base or dictionary form, considering their context and meaning. For example, "running" becomes "run" and "better" becomes "good."
 
-When handling categorical data, we removeds rows with a `choose_one` value of `Can't decide`, according to what was outlined in assignment 1. Next, we mapped the `choose_one` values `Relevant` and `Not Relevant` to `1` and `0`, respectively. This was stored in a new feature, called `target`.
-
 Moreover, we removed duplicated rows with regards to the `text` column, as outlined in assignment 1.
 
-## 2. Extract features
+When handling categorical data, we removeds rows with a `choose_one` value of `Can't decide`, according to what was outlined in assignment 1. Next, we mapped the `choose_one` values `Relevant` and `Not Relevant` to `1` and `0`, respectively. This was stored in a new feature, called `target`.
 
+**NOTE:**
+For the test set, we did not remove any rows to not skew the results. However, the `choose_one` still needs to be mapped to a binary value such that the models predictions and the test set can be compared. In this delivery, we have mapped all the rows with 'cant decide' to 0. This is obvoiusly not ideal, as it may lead to metrics that are not representative of the model's performance. Another solution we considered was to remove the rows with 'cant decide' from the test set, from the perspective that wrong labling is out of the scope of the project. However, we went with the first alternative.
+
+## 2. Extract features
 We have done feature extraction from two raw columns in the dataset: 'text' and 'keyword'. Here we will outline how the feature were extracted.
 
-### Text
-Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. The following methods were used to extract features from the text.
+### The text column
+Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. The following methods were used to extract features from the text
 
 #### TF-IDF
 TD-IDF, or term frequency–inverse document frequency, is an extenstion of the bag-of-words model. The bag-of-words algorithm represents a document by the occurrence of words within a it. You first build a vocabulary by looking at the set of all words used in the corpus. The amount of words in the vocabulary maps directly to the number of features it produces for a given document. The result of embedding a document with bag-of-words is simply a one hot encoding of the ocurrences of the words in the vocabulary in the document.
@@ -71,41 +73,6 @@ When using TF-IDF on the raw text, you loose all the semantic meaning of how the
 
 Currently we extract all bigrams and trigrams from the text, concatinate them using _, then append the result to the rest of the text. TF-IDF is then used on the result, using the `max_features` parameter to limit the number of features to the top 1000 most significant unigrams, bigrams and trigram.
 
-```py
-from nltk.util import ngrams
-from nltk.tokenize import word_tokenize
-
-
-def create_ngrams(text, n):
-    tokens = word_tokenize(text)
-    n_grams = list(ngrams(tokens, n))
-    return n_grams
-
-
-df['bigrams'] = df['cleaned_text'].apply(lambda x: create_ngrams(x, 2))
-df['trigrams'] = df['cleaned_text'].apply(lambda x: create_ngrams(x, 3))
-```
-
-We also inspected the most common bigrams and trigrams in disaster-related tweets and non-disaster related tweets:
-
-```py
-from collections import Counter
-
-
-disaster_bigrams = df[df['target'] == 1]['bigrams']
-non_disaster_bigrams = df[df['target'] == 0]['bigrams']
-
-disaster_bigram_counts = Counter([gram for ngram_list in disaster_bigrams for gram in ngram_list])
-non_disaster_bigram_counts = Counter([gram for ngram_list in non_disaster_bigrams for gram in ngram_list])
-
-
-print("Most common n-grams in disaster-related tweets:")
-print(disaster_bigram_counts.most_common(10))
-
-
-print("\nMost common n-grams in non-disaster tweets:")
-print(non_disaster_bigram_counts.most_common(10))
-```
 
 Result for bigrams:
 
@@ -117,26 +84,6 @@ Most common bigrams in non-disaster tweets:
 [(('i', 'am'), 173), (('do', 'not'), 89), (('can', 'not'), 51), (('you', 'are'), 50), (('youtube', 'video'), 33), (('liked', 'youtube'), 32), (('i', 'have'), 26), (('cross', 'body'), 26), (('body', 'bag'), 26), (('going', 'to'), 25)]
 ```
 
-Did the same for trigrams
-
-```py
-
-disaster_trigrams = df[df['target'] == 1]['trigrams']
-non_disaster_trigrams = df[df['target'] == 0]['trigrams']
-
-
-disaster_trigram_counts = Counter([gram for ngram_list in disaster_trigrams for gram in ngram_list])
-non_disaster_trigram_counts = Counter([gram for ngram_list in non_disaster_trigrams for gram in ngram_list])
-
-
-print("Most common trigrams in disaster-related tweets:")
-print(disaster_trigram_counts.most_common(10))
-
-
-print("\nMost common trigrams in non-disaster tweets:")
-print(non_disaster_trigram_counts.most_common(10))
-```
-
 Result for trigrams:
 
 ```py
@@ -146,6 +93,8 @@ Most common trigrams in disaster-related tweets:
 Most common trigrams in non-disaster tweets:
 [(('liked', 'youtube', 'video'), 32), (('i', 'am', 'going'), 18), (('pick', 'fan', 'army'), 18), (('cross', 'body', 'bag'), 17), (('reddits', 'new', 'content'), 11), (('new', 'content', 'policy'), 11), (('low', 'selfimage', 'take'), 10), (('selfimage', 'take', 'quiz'), 10), (('deluged', 'invoice', 'make'), 10), (('likely', 'rise', 'top'), 10)]
 ```
+
+As you can see in the results, there is a bug in the code where the text the ngrams are extracted from  is not lemmatized. This is not good for performance and is something we should look into.
 
 #### Sentiment analysis
 
@@ -159,33 +108,13 @@ def analyze_sentiment_vader(text):
 
 df['sentiment'] = df['text'].apply(analyze_sentiment_vader)
 df_test['sentiment'] = df_test['text'].apply(analyze_sentiment_vader)
-
-df.sentiment.head()
-
-```
-
-Based on the code below, it seemed like it was a significant difference in the sentiment between the disaster-related and not disaster-related tweets. We then looked at the counts for each sentiment, and saw there was a distribution imbalance where the majority of disaster-related tweets had a negative sentiment, whilst there was way more positive sentiment amongst the "non-disaster-related" tweets.
-
-
-```py
-
-from scipy import stats
-
-disaster_group = df[df['target'] == 1]['sentiment']
-not_disaster_group = df[df['target'] == 0]['sentiment']
-
-t_statistic, p_value = stats.ttest_ind(disaster_group, not_disaster_group, equal_var=False)
-
-print(p_value)
-if p_value < 0.05:
-    print("There is a significant difference in sentiment between disaster and not disaster tweets.")
-else:
-    print("There is no significant difference in sentiment between disaster and not disaster tweets.")
 ```
 
 ### Keyword column
 
 The keyword feature is important because it is the word from the text that may have the strongest correlation to the target. To extract features from it, we encode it using the same TF-IDF method. This way, the model can fit to these features if it sees a strong correlation between the keyword and the target.
+
+Another way we could have "extracted features features" from this could be by just appending the keyword 1 or x times to the text, thereby increasing the weight of the keyword in the text. This might be a good idea, but we have not tried it.
 
 ## 3. Select features
 
@@ -193,32 +122,32 @@ These are the extracted feature that, in addition to the raw features, can be se
 
 | Feature        | Description                                  | Selected |
 |----------------|----------------------------------------------|----------|
-| set of words from keyword column        | The extracted features from the keyword column   | Yes      |
-| set of words from text + ngrams        | The extracted features from the text column (including n-grams)   | Yes      |
-| has_url        | Boolean indicating if the text has a URL.    | Yes      |
-| sentiment      | Sentiment value of the text.                 | Yes      |
 | text_length    | The length of the text in characters.        | No       |
 | hashtag_count  | Number of hashtags used in the text.         | No       |
 | mention_count  | Number of mentions (@) in the text.          | No       |
+| has_url        | Boolean indicating if the text has a URL.    | Yes      |
+| sentiment      | Sentiment value of the text.                 | Yes      |
+| extracted of features from text + ngrams        | The extracted features from the text column (including n-grams)   | Yes      |
+| extracted features from keyword column        | The extracted features from the keyword column   | Yes      |
 
 
-**Length of the text**
+**text_length**
 ![Alt text](image-4.png)
 The distribution of the text-length is fairly similar for both disaster and non-disaster tweets. The difference may be significant, but it is not very large. Thus, we decided not to use this feature in our model.
 
-**Number of hashtags used in the text**
+**hashtag_count**
 ![Alt text](image-3.png)
 The hashtag count also has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
 
-**Number of mentions (@) in the text**
+**mention_count**
 ![Alt text](image-2.png)
 The mention count has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
 
-**If the tweet contains a url**
+**has_url**
 ![Alt text](image-1.png)
 The url count has quite a large difference between disaster and non-disaster tweets. We can see that the majority of disaster-related tweets contain a url, whilst the majority of non-disaster tweets do not contain a url. This is of course not enough to conclude that the tweet is disaster-related, but it might be a useful feature.
 
-**Sentiment analysis**
+**sentiment**
 We computed the t-statistic and p-value by performing an independent two-sample t-test on the sentiment scores of tweets categorized as disaster-related and non-disaster-related tweets. The sentiment scores were calculated using VADER sentiment analysis, where higher values denote more positive sentiment and lower values denote more negative sentiment. The t-statistic indicates the magnitude and direction of the difference in mean sentiment scores between the two groups, while the p-value quantifies the evidence against the hypothesis that the groups have the same mean sentiment.
 
 The results of the t-test was -21.96539979122823:
@@ -233,9 +162,11 @@ The negative t-statistic suggests that, on average, disaster tweets have lower s
 
 From this we can conclude that the sentiment feature is useful, so we use it in our model.
 
-
-**N-grams**
+**extracted of features from text + ngrams**
 The n-grams contains semantic infomation about the text which would otherwise be lost when using TF-IDF. From eye-balling the result in part "2. Extract features - N-grams" we can see a distinct difference in the results of the disaster-related and non-disaster-related top n-grams. Based on this, we choose to use the n-grams as features in our model.
+
+**extracted features from keyword column**
+We include the keyword column in our analysis since it is the word from the text that may have the strongest correlation to the target. 
 
 ## 4. Modelling
 When evaluating the performance of our models, we want to ensure that they are both accurate and generalizable. Accuracy refers to how well the model performs on the training data. Generalizability refers to how well the model performs on unseen data. A model that is accurate but not generalizable is overfitting to the training data, while a model that is neither accurate nor generalizable is underfitting. To account for this, the first thing we did was to split the data into a training set and a test set. We used 80% of the data for training and 20% for testing. Both the training and test sets were preprocessed in the same way. However, no rows were removed from the test set during preprocessing as this would skew the results. We also made sure to fit the TF-IDF vectorizers on the training set only, to avoid data leakage.
@@ -282,6 +213,12 @@ Overall accuracy: 0.85
 
 Overall accuracy: 0.79
 
+_Confusion Matrix for Testing:_
+| Actual \ Predicted | Predicted 0 | Predicted 1 |
+|--------------------|-------------|-------------|
+| Actual 0           | 3393        | 202         |
+| Actual 1           | 371         | 1929         |
+
 #### 4.1.3.2 Results after hyperparameter tuning
 
 We got the best results with the following hyperparameters:
@@ -297,9 +234,6 @@ We got the best results with the following hyperparameters:
 
 Overall Train Accuracy: 0.9028
 
-Confusion Matrix for Training:  
-[[3393, 202],  
-[371, 1929]]
 
 **Test result**
 
@@ -331,45 +265,104 @@ The second basic modelling method used was a support vector machine (SVM). SVM w
 - **Clear margin of separation**. SVMs aim to find the hyperplane that has the maximum margin between two classes. This often results in better generalization to unseen data, reducing the risk of overfitting.
 
 ### 4.2.2 Hyperparameters
+- `C`: Same as for logreg
+- `kernel`: Specifies the type of kernel to be used in the algorithm. The choices are:
+    - `linear`
+    - `poly`
+    - `rbf` (Radial basis function)
+    - `sigmoid`
+    - `precomputed` or any user-defined kernel
+    - `degree`: Degree of the polynomial kernel ('poly'). Ignored by all other kernels.
 
-- **Regularization (`C`)**. The hyperparameter `C` is the inverse of regularization strength. Smaller values of `C` indicate stronger regularization, which can prevent overfitting, but might also lead to underfitting if too strong. On the other hand, larger values of `C` mean weaker regularization, which might fit the training data more closely but risk overfitting. By tuning `C`, we aim to strike the right balance between underfitting and overfitting.
+- `gamma`: Kernel coefficient for 'rbf', 'poly', and 'sigmoid'.
+    - If gamma is 'scale' (default), then it is calculated as 1 / (n_features * X.var()) for the input data X.
+    - If gamma is 'auto', it is set to 1/n_features.
 
-- **Penalty (`penalty`)**. The `penalty` parameter specifies the type of regularization to be applied. The most common types are L1 and L2 regularization. L1 regularization can lead to some coefficients becoming exactly zero, effectively selecting a simpler model with fewer features. On the other hands, L2 regularization tends to shrink coefficients but not set them to zero. The choice between L1 and L2 can impact the model's performance and interpretability.
+- `coef0`: Independent term in the kernel function. It's only significant in 'poly' and 'sigmoid'.
+- `shrinking`: Whether to use the shrinking heuristic. This is a technique that can speed up the training process by removing some of the constraints that are not likely to change the final solution.
+- `probability`: Whether to enable probability estimates. If True, it enables the predict_proba method, which gives class probabilities.
+- `tol`: Tolerance for stopping criterion. It sets a small threshold, and if the change in the fit between iterations is smaller than this threshold, the training stops.
+- `cache_size`: Specifies the size of the kernel cache (in MB).
+- `class_weight`: Set the parameter C of class i to class_weight[i]*C for SVC. If not given, all classes are supposed to have weight one. It's useful for unbalanced classes.
+- `verbose`: To enable verbose output. Useful for debugging.
+- `max_iter`: Hard limit on iterations within the solver. -1 means no limit.
+- `decision_function_shape`: Whether to return a one-vs-rest ('ovr') decision function of shape (n_samples, n_classes) or the original one-vs-one ('ovo') decision function of libsvm which has shape (n_samples, n_classes * (n_classes - 1) / 2).
+- `break_ties`: If true, decision_function_shape='ovr', and the number of classes > 2, predict will break ties according to the confidence values of decision_function. Otherwise, the first class among the tied classes is returned.
+random_state: Controls the pseudo-random number generation for shuffling the data for probability estimation.
 
-- **Solver (`solver`)**. The `solver` parameter dictates the optimization algorithm to be used. Different solvers might converge at different rates and can have varying levels of accuracy, depending on the nature of the data and the problem. Some solvers work better with certain penalty types, making it important to consider the combination of `solver` and `penalty` when tuning the model.
 
-For the SVM, the regularization parameter `C` was adjusted to analyze the decision boundary. We explored different types of kernels using the `kernel` parameter, including `linear` and `rbf`. The coefficient for the kernel function, `gamma`, was also tuned, toggling between `scale` and `auto`. The grid search cross-validated the model's performance for each combination.
-
-The accuracy obtained after hyperparameter tuning (approximately 91.63%) is **slightly higher** than the accuracy from the initial SVM model, which was around 91.43%. In particular, it was the change of `kernel` parameter: from `linear` to `rbf`. The hyperparameter tuning process for SVM managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
-
-- **Regularization (`C`)**. Like in Logistic Regression, the `C` parameter in SVM controls the trade-off between obtaining a wider margin and classifying the training points correctly. A smaller `C` creates a wider margin, which might misclassify more points, while a larger `C` results in a narrower margin, making the model fit more closely to the training data. Adjusting `C` helps balance between overfitting (high variance) and underfitting (high bias).
-
-- **Kernel (`kernel`)**. The kernel trick allows SVM to create non-linear decision boundaries. The choice of kernel can significantly impact the model's performance. The `rbf` (Radial Basis Function) kernel, on the other hand, can create more complex, non-linear boundaries.
-
-- **Kernel Coefficient (`gamma`)**. Adjusting `gamma` can help control the shape and complexity of the decision boundary, impacting the model's generalization capability.
-
-### 4.2.3 Modelling results
-
-> TODO: skrive
 #### Stock model (no tuning)
+**Validation result (5-fold cross-validation):**
+
+| Label | Precision | Recall | F1-Score | Support |
+|-------|-----------|--------|----------|---------|
+| 0     | 0.86      | 0.91   | 0.88     | 3595    |
+| 1     | 0.84      | 0.77   | 0.80     | 2300    |
+
+Overall Train Accuracy: 0.8538
+
+Confusion Matrix for Training:  
+[[3265, 330],  
+[532, 1768]]
+
+**Test result**
+
+| Label | Precision | Recall | F1-Score | Support |
+|-------|-----------|--------|----------|---------|
+| 0     | 0.79      | 0.87   | 0.83     | 1219    |
+| 1     | 0.81      | 0.70   | 0.76     | 957     |
+
+Overall Test Accuracy: 0.7992
+
+Confusion Matrix for Testing:  
+| Actual \ Predicted | Predicted 0 | Predicted 1 |
+|--------------------|-------------|-------------|
+| Actual 0           | 1065        | 154         |
+| Actual 1           | 283         | 674         |
+
 #### Results after hyperparameter tuning
+The linear kernal is much quicker at training than the radial basis function. Performing grid search with it takes a long time and is not something we got to do for this assignment.
+
+Using grid search we found that from the values 0.001, 0.01 of C, 0.001 was better and got this result:
+
+**Validation result (5-fold cross-validation):**
+
+| Label | Precision | Recall | F1-Score | Support |
+|-------|-----------|--------|----------|---------|
+| 0     | 0.61      | 1.00   | 0.76     | 3595    |
+| 1     | 0.00      | 0.00   | 0.00     | 2300    |
+
+Overall Train Accuracy: 0.6098
+
+Confusion Matrix for Training:  
+[[3595, 0],  
+[2300, 0]]
+
+**Test result**
+
+| Label | Precision | Recall | F1-Score | Support |
+|-------|-----------|--------|----------|---------|
+| 0     | 0.56      | 1.00   | 0.72     | 1219    |
+| 1     | 0.00      | 0.00   | 0.00     | 957     |
+
+Overall Test Accuracy: 0.5602
+
+Confusion Matrix for Testing:  
+| Actual \ Predicted | Predicted 0 | Predicted 1 |
+|--------------------|-------------|-------------|
+| Actual 0           | 1219        | 0           |
+| Actual 1           | 957         | 0           |
+
+### 4.3 Interpreting the results
+> TODO: vi burde serriøst skrive noe om hva vi tenker om resultatene. Gir de mening, er det gode resultater, osv osv
 
 ## 5. Comparing modelling methods
 
-> TODO: Write a paragraph about the comparison of the modelling methods.
-
 ### 5.1. Selecting  two performance metrics and comparing modelling methods
 
-- accuracy
+Chosen metrics: Accuracy and F1-score
   
-Used accuracy as a general metric to determine how precise our model was. 
-
-- f1 scores
-
-We chose to look at f1-scores as f1-scores incorporates both precision and recall. 
-
-(Lim inn bilder)
-...
+Accuracy is used as a general metric to determine how precise our model was.  We chose to look at f1-scores as f1-scores incorporates both precision and recall. 
 
 ### 5.2. Why they perform similar
 
