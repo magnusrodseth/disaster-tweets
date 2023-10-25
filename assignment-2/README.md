@@ -178,7 +178,7 @@ else:
 
 ## 3. Select features
 
-These are the features that we have to choose from:
+These are the raw features we have extracted that the model is able to use out of the box that we have to choose from:
 
 | Feature        | Type | Description                                |
 |----------------|------|--------------------------------------------|
@@ -188,58 +188,124 @@ These are the features that we have to choose from:
 | mention_count  | ?    | Number of mentions (@) in the text.        |
 | has_url        | ?    | Boolean indicating if the text has a URL.  |
 | sentiment      | ?    | Sentiment value of the text.               |
-| bigrams        | ?    | Two consecutive words in the text.         |
-| trigrams       | ?    | Three consecutive words in the text.       |
 
-
+**Length of the text**: **not selected**
 ![Alt text](image-4.png)
-We see that the distribution of the text-length is fairly similar for both disaster and non-disaster tweets. The difference may be significant, but it is not very large. We decided to keep the feature, as it might still be useful.
+We see that the distribution of the text-length is fairly similar for both disaster and non-disaster tweets. The difference may be significant, but it is not very large. Thus, we decided not to use this feature in our model.
 
+**How many hashtags used in the text: not selected**
 ![Alt text](image-3.png)
-The hashtag count also has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, but we decided to keep the feature.
+The hashtag count also has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
 
+**How many mentions (@) in the text: not selected**
 ![Alt text](image-2.png)
-The mention count has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, but we decided to keep the feature.
+The mention count has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
 
+**If the tweet contains a url: selected**
 ![Alt text](image-1.png)
 The url count has quite a large difference between disaster and non-disaster tweets. We can see that the majority of disaster-related tweets contain a url, whilst the majority of non-disaster tweets do not contain a url. This is of course not enough to conclude that the tweet is disaster-related, but it might be a useful feature.
 
+**Sentiment analysis: selected**
+We computed the t-statistic and p-value by performing an independent two-sample t-test on the sentiment scores of tweets categorized as disaster-related and those that are not. The sentiment scores were calculated using VADER sentiment analysis, where higher values denote more positive sentiment and lower values denote more negative sentiment. The t-statistic indicates the magnitude and direction of the difference in mean sentiment scores between the two groups, while the p-value quantifies the evidence against the hypothesis that the groups have the same mean sentiment.
+
+The results of the t-test was -21.96539979122823:
+The t-statistic measures the size of the difference relative to the variation in the data. A larger absolute value of the t-statistic means that the difference is more significant.
+
+Since it's negative, this indicates that the mean sentiment score of the disaster_group is lower than the mean sentiment score of the not_disaster_group.
+
+The p-value was 3.520081770393815e-102:
+The p-value is extremely small, specifically 3.52 x 10^-102. In general terms, when the p-value is near 0, it suggests that the observed data is very unlikely under the null hypothesis. The null hypothesis for this t-test is that the mean sentiment scores of the disaster and non-disaster tweets are the same.
+
+A very small p-value, especially one as tiny as this, provides strong evidence against the null hypothesis, leading us to reject it. In other words, it indicates a statistically significant difference in sentiment scores between the two groups.
+
+Given this result, we conclude that there is a statistically significant difference in sentiment scores between disaster tweets and non-disaster tweets.
+The negative t-statistic suggests that, on average, disaster tweets have lower sentiment scores compared to non-disaster tweets, which makes sense given the nature of the tweets. 
+
+From this we can conclude that the sentiment feature is useful, so we use it in our model.
+
+**N-grams**
+We include the n-grams in our analysis since they include additional semantic infomation about the text which would otherwise be lost when using tf-idf. We use the n-grams as features in our model.
+
 ## 4. Modelling
+When evaluating the performance of our models, we want to ensure that they are both accurate and generalizable. Accuracy refers to how well the model performs on the training data. Generalizability refers to how well the model performs on unseen data. A model that is accurate but not generalizable is overfitting to the training data, while a model that is neither accurate nor generalizable is underfitting. To account for this, the first thing we did was to split the data into a training set and a test set. We used 80% of the data for training and 20% for testing. Both the training and test sets were preprocessed in the same way. However, no rows were removed from the test set during preprocessing as this would skew the results. We also made sure to fit the TF-IDF vectorizers on the training set only, to avoid data leakage.
+
+We trained the models on the training set using 5-fold cross-validation. The reason for using cross-validation is to ensure that the model is evaluated on different subsets of the training data. This helps reduce the risk of overfitting. The reason for using 5 folds is that it is a good balance between computational cost and accuracy. We then used the trained model to predict the labels for the test set. This way we ensure that the model is evaluated on unseen data, giving us a better idea of how well it would perform in the real world.  However, it should still be said that the test set is not a perfect representation of the real world. The test set is still a subset of the same dataset, and the data is not collected in real-time. This means that the test set is not a perfect representation of the real world. 
+
+To tune our models we use grid search. Grid search is a technique for finding the optimal combination of hyperparameters for a given model. The reason for using grid search is that it is a simple and effective way of testing which parameters make the model perform the best. The downside of grid search is that it is computationally expensive. However, since we are only tuning a few hyperparameters, the computational cost is not too high.
+
 ## 4.1 Logistic regression
 The first basic modelling method used was logistic regression. Logistic regression was chosen due to the following reasons:
 
-- **Binary Outcome**. The target variable (`target`) is binary, with values either `0` (Not Relevant) or `1` (Relevant). Logistic regression is designed to model the probability of a binary outcome, making it a suitable choice for this dataset.
+**Binary Classification:** Logistic Regression models probability of output in terms of input, so by introducing a threshold value it can be used as a classifier which fits our binary classification problem.
 
-- **Linear Decision Boundary**. Logistic regression assumes a linear relationship between the log-odds of the outcome and the predictor variables. If the relationship between the vectorized text features and the target variable is approximately linear in the log-odds space, logistic regression will perform well.
+**Simplicity and Interpretability:** Logistic Regression is a relatively simple algorithm, both conceptually and in terms of implementation. It's a good starting point because its results serve as a benchmark for more complex models. Furthermore, the coefficients in a logistic regression model can offer insights into the importance and impact of each feature (in this case, TF-IDF weighted terms) on the outcome. This can help in understanding which terms or words are more indicative of a tweet being connected to an accident, thus also helping us understand the problem better before moving on to more complex models.
+
+**Baseline Model:** This is just the beginning of the project. Starting with a simpler model like Logistic Regression allows us to establish a baseline performance. Once we have this baseline, you can then explore more complex models and techniques, ensuring that any added complexity genuinely results in better performance. It’s a principle of model development to start simple and then add complexity as needed.
+
+**Proven Track Record:** Logistic Regression is a classic. Its longstanding reputation in the domain ensures that it's a tried-and-tested method to begin with.
+
+### Hyperparameter tuning
+These are the hyperparameters we tuned for logistic regression:
+
+- `C`: Varying levels of regularization (default = 1.0)
 
 ### Results
-The logistic regression model achieved an accuracy of approximately 91.03% on the test dataset. Analyzing the classification report, we observe the following details for each class:
 
-For class `0` (Not Relevant):
+#### Stock model (no tuning)
 
-- **Precision**: 90% of the instances predicted as class `0` were correctly identified by the model.
-- **Recall**: Out of all the actual instances of class `0`, the model successfully recognized 95% of them.
-- **F1-Score**: The F1-score for class `0` is 92%.
+**Validation result (5-fold cross-validation):**
+| Label | Precision | Recall | F1-Score |
+|-------|-----------|--------|----------|
+| 0     | 0.86      | 0.90   | 0.88     |
+| 1     | 0.84      | 0.76   | 0.80     |
 
-For class `1` (Relevant):
+Overall accuracy: 0.85
 
-- **Precision**: 93% of the instances predicted as class `1` were correctly identified by the model.
-- **Recall**: Out of all the actual instances of class `1`, the model successfully recognized 86% of them.
-- **F1-Score**: The F1-score for class `1` stands at 89%.
 
-On a broader scale, the macro average indicates an average precision, recall, and F1-score all of approximately 91%. The weighted average, which considers the number of instances in each class, also suggests an average precision, recall, and F1-score all around 91%.
+**Test result**
+| Label | Precision | Recall | F1-Score |
+|-------|-----------|--------|----------|
+| 0     | 0.78      | 0.87   | 0.82     |
+| 1     | 0.81      | 0.69   | 0.75     |
 
-Inspecting the confusion matrix:
+Overall accuracy: 0.79
 
-- 806 instances were correctly classified as class `0`, while 41 instances were incorrectly predicted as class `0` when they were actually class `1`.
-- Conversely, 554 instances were correctly labeled as class `1`, but 93 instances were wrongly classified as class `1` when they were in fact class `0`.
+### Results after hyperparameter tuning
 
-#### Hyperparameter tuning
-For hyperparameter tuning, we used `GridSearchCV` to find the optimal hyperparameters for each model.
+We got the best results with the following hyperparameters:
 
-For logistic regression, we performed a grid search to identify the optimal combination of hyperparameters. We considered varying levels of regularization strength by adjusting the `C` parameter. The type of penalization was alternated between `l1` and `l2` using the `penalty` parameter. Additionally, different optimization algorithms were tested using the `solver` parameter, including `liblinear` and `saga`. The grid search cross-validated the model's performance for each combination.
+- `C`: 2.0
 
-The accuracy obtained after hyperparameter tuning (approximately 91.36%) is **slightly higher** than the accuracy from the initial logistic regression model, which was around 91.03%. In particular, it was the change of `C` and `lbfgs` parameter: from `C=1.0` to `C=2.0` and from `lbfgs` to `liblinear`. The hyperparameter tuning process for logistic regression managed to find a set of parameters that improved the model's accuracy slightly. This highlights the importance of such tuning processes.
+**Validation result (5-fold cross-validation):**
+
+| Label | Precision | Recall | F1-Score | Support |
+|-------|-----------|--------|----------|---------|
+| 0     | 0.90      | 0.94   | 0.92     | 3595    |
+| 1     | 0.91      | 0.84   | 0.87     | 2300    |
+
+Overall Train Accuracy: 0.9028
+
+Confusion Matrix for Training:  
+[[3393, 202],  
+[371, 1929]]
+
+**Test result**
+
+| Label | Precision | Recall | F1-Score | Support |
+|-------|-----------|--------|----------|---------|
+| 0     | 0.79      | 0.87   | 0.83     | 1219    |
+| 1     | 0.81      | 0.71   | 0.75     | 957     |
+
+Overall Test Accuracy: 0.7955
+
+Confusion Matrix for Testing:  
+| Actual \ Predicted | Predicted 0 | Predicted 1 |
+|--------------------|-------------|-------------|
+| Actual 0           | 1056        | 163         |
+| Actual 1           | 282         | 675         |
+
+This plot shows the top 50 features that have the highest coefficients from the trained model. The words hiroshima, wildfire, eartquake, california, fire and police has the highest influence in favor of an accident, while the words love, wedding and book are weighted as the most influential features for non-accident tweets.
+![Alt text](image-6.png)
 
 ## 4.2. Support Vector Machine (SVM)
 The second basic modelling method used was a support vector machine (SVM). SVM were chosen due to the following reasons:
