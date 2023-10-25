@@ -4,11 +4,13 @@ Written and developed by Haakon Tideman Kanter, Henrik Skog, Mattis Czternasty H
 
 ## 1. Implement the preprocessing
 
-We started by removing features, according to what was outlined in assignment 1. Additionally, we removed the `location` feature to preserve the privacy of the users and because it is not particularly relevant to determing whether a tweet is related to a disaster. Next, we removed rows with a confidence threshold below `1.0`.
+We started by removing features, according to what was outlined in assignment 1. Additionally, we removed the `location` feature to preserve the privacy of the users and because it is not particularly relevant to determing whether a tweet is related to a disaster. Next, we removed rows with a confidence threshold below `0.7`.
 
 Next, we preprocessed the textual data. We cleaned up the `keyword` column, ensuring that all keywords were lower case, and that all keywords were separated by a single space. For comparison, some keywords were on the format `airplane%20accident`, which should be `airplane accident`.
 
-Furthermore, we cleaned the `text` column. The first part of this included removing links, line breaks, extra spaces, special characters and punctuation. Next, we removed English stopwords. Finally, we lemmatized the text.
+Furthermore, we cleaned the `text` column. The first part of this included removing links, line breaks, extra spaces, special characters and punctuation. Next, we removed English stopwords.
+
+Finally, we lemmatized the text. Lemmatization is the process of reducing words to their base or dictionary form, considering their context and meaning. For example, "running" becomes "run" and "better" becomes "good."
 
 When handling categorical data, we removeds rows with a `choose_one` value of `Can't decide`, according to what was outlined in assignment 1. Next, we mapped the `choose_one` values `Relevant` and `Not Relevant` to `1` and `0`, respectively. This was stored in a new feature, called `target`.
 
@@ -16,10 +18,10 @@ Moreover, we removed duplicated rows with regards to the `text` column, as outli
 
 ## 2. Extract features
 
-The raw columns in the dataset we are working with are the text column and the keyword column. Here we will explain how we extract features from these columns.
+We have done feature extraction from two raw columns in the dataset: 'text' and 'keyword'. Here we will outline how the feature were extracted.
 
 ### Text
-Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. The following methods were used to extract features from the text
+Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. The following methods were used to extract features from the text.
 
 #### TF-IDF
 TD-IDF, or term frequency–inverse document frequency, is an extenstion of the bag-of-words model. The bag-of-words algorithm represents a document by the occurrence of words within a it. You first build a vocabulary by looking at the set of all words used in the corpus. The amount of words in the vocabulary maps directly to the number of features it produces for a given document. The result of embedding a document with bag-of-words is simply a one hot encoding of the ocurrences of the words in the vocabulary in the document.
@@ -108,10 +110,10 @@ print(non_disaster_bigram_counts.most_common(10))
 Result for bigrams:
 
 ```py
-Most common n-grams in disaster-related tweets:
+Most common bigrams in disaster-related tweets:
 [(('suicide', 'bomber'), 78), (('northern', 'california'), 53), (('california', 'wildfire'), 44), (('home', 'razed'), 37), (('suicide', 'bombing'), 36), (('oil', 'spill'), 36), (('latest', 'home'), 36), (('razed', 'northern'), 36), (('severe', 'thunderstorm'), 35), (('70', 'year'), 34)]
 
-Most common n-grams in non-disaster tweets:
+Most common bigrams in non-disaster tweets:
 [(('i', 'am'), 173), (('do', 'not'), 89), (('can', 'not'), 51), (('you', 'are'), 50), (('youtube', 'video'), 33), (('liked', 'youtube'), 32), (('i', 'have'), 26), (('cross', 'body'), 26), (('body', 'bag'), 26), (('going', 'to'), 25)]
 ```
 
@@ -162,9 +164,7 @@ df.sentiment.head()
 
 ```
 
-Based on the code below, it seemed like it was a significant difference in the sentiment between the disaster-related and not disaster-related tweets. We then looked at the counts for each sentiment, and saw there was a distribution imbalance where the majority of disaster-related tweets had a negative sentiment, whilst there was way more positive sentiment amongst the "non-disaster-related" tweets. 
-
-We also tested with "text" instead of "cleaned_text" and the results were still the same (significant difference).
+Based on the code below, it seemed like it was a significant difference in the sentiment between the disaster-related and not disaster-related tweets. We then looked at the counts for each sentiment, and saw there was a distribution imbalance where the majority of disaster-related tweets had a negative sentiment, whilst there was way more positive sentiment amongst the "non-disaster-related" tweets.
 
 
 ```py
@@ -185,11 +185,11 @@ else:
 
 ### Keyword column
 
-The keyword feature is important becausee it is the word from the text that may have the strongest correlation to the target. To extract features from it, we encode it using the same tf-ifd method. This way, the model can fit to these features if it sees a strong correlation between the keyword and the target.
+The keyword feature is important because it is the word from the text that may have the strongest correlation to the target. To extract features from it, we encode it using the same TF-IDF method. This way, the model can fit to these features if it sees a strong correlation between the keyword and the target.
 
 ## 3. Select features
 
-These are the raw features we have extracted that the model is able to use out of the box that we have to choose from:
+These are the extracted feature that, in addition to the raw features, can be selected to be used in the model.
 
 | Feature        | Description                                  | Selected |
 |----------------|----------------------------------------------|----------|
@@ -204,13 +204,13 @@ These are the raw features we have extracted that the model is able to use out o
 
 **Length of the text**
 ![Alt text](image-4.png)
-We see that the distribution of the text-length is fairly similar for both disaster and non-disaster tweets. The difference may be significant, but it is not very large. Thus, we decided not to use this feature in our model.
+The distribution of the text-length is fairly similar for both disaster and non-disaster tweets. The difference may be significant, but it is not very large. Thus, we decided not to use this feature in our model.
 
-**How many hashtags used in the text**
+**Number of hashtags used in the text**
 ![Alt text](image-3.png)
 The hashtag count also has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
 
-**How many mentions (@) in the text**
+**Number of mentions (@) in the text**
 ![Alt text](image-2.png)
 The mention count has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
 
@@ -219,25 +219,23 @@ The mention count has a similar distribution for both disaster and non-disaster 
 The url count has quite a large difference between disaster and non-disaster tweets. We can see that the majority of disaster-related tweets contain a url, whilst the majority of non-disaster tweets do not contain a url. This is of course not enough to conclude that the tweet is disaster-related, but it might be a useful feature.
 
 **Sentiment analysis**
-We computed the t-statistic and p-value by performing an independent two-sample t-test on the sentiment scores of tweets categorized as disaster-related and those that are not. The sentiment scores were calculated using VADER sentiment analysis, where higher values denote more positive sentiment and lower values denote more negative sentiment. The t-statistic indicates the magnitude and direction of the difference in mean sentiment scores between the two groups, while the p-value quantifies the evidence against the hypothesis that the groups have the same mean sentiment.
+We computed the t-statistic and p-value by performing an independent two-sample t-test on the sentiment scores of tweets categorized as disaster-related and non-disaster-related tweets. The sentiment scores were calculated using VADER sentiment analysis, where higher values denote more positive sentiment and lower values denote more negative sentiment. The t-statistic indicates the magnitude and direction of the difference in mean sentiment scores between the two groups, while the p-value quantifies the evidence against the hypothesis that the groups have the same mean sentiment.
 
 The results of the t-test was -21.96539979122823:
 The t-statistic measures the size of the difference relative to the variation in the data. A larger absolute value of the t-statistic means that the difference is more significant.
 
 Since it's negative, this indicates that the mean sentiment score of the disaster_group is lower than the mean sentiment score of the not_disaster_group.
 
-The p-value was 3.520081770393815e-102:
-The p-value is extremely small, specifically 3.52 x 10^-102. In general terms, when the p-value is near 0, it suggests that the observed data is very unlikely under the null hypothesis. The null hypothesis for this t-test is that the mean sentiment scores of the disaster and non-disaster tweets are the same.
+The p-value was 3.52 x 10^-102. An extremely small number in this context. In general terms, a p-value near 0 suggests that the observed data is very unlikely under the null hypothesis. The null hypothesis for this t-test is that the mean sentiment scores of the disaster and non-disaster tweets are the same.
 
-A very small p-value, especially one as tiny as this, provides strong evidence against the null hypothesis, leading us to reject it. In other words, it indicates a statistically significant difference in sentiment scores between the two groups.
-
-Given this result, we conclude that there is a statistically significant difference in sentiment scores between disaster tweets and non-disaster tweets.
+This provides strong evidence against the null hypothesis, and leads us to conclude that there is a statistically significant difference in sentiment scores between disaster tweets and non-disaster tweets.
 The negative t-statistic suggests that, on average, disaster tweets have lower sentiment scores compared to non-disaster tweets, which makes sense given the nature of the tweets. 
 
 From this we can conclude that the sentiment feature is useful, so we use it in our model.
 
+
 **N-grams**
-We include the n-grams in our analysis since they include additional semantic infomation about the text which would otherwise be lost when using tf-idf. We use the n-grams as features in our model.
+The n-grams contains semantic infomation about the text which would otherwise be lost when using TF-IDF. From eye-balling the result in part "2. Extract features - N-grams" we can see a distinct difference in the results of the disaster-related and non-disaster-related top n-grams. Based on this, we choose to use the n-grams as features in our model.
 
 ## 4. Modelling
 When evaluating the performance of our models, we want to ensure that they are both accurate and generalizable. Accuracy refers to how well the model performs on the training data. Generalizability refers to how well the model performs on unseen data. A model that is accurate but not generalizable is overfitting to the training data, while a model that is neither accurate nor generalizable is underfitting. To account for this, the first thing we did was to split the data into a training set and a test set. We used 80% of the data for training and 20% for testing. Both the training and test sets were preprocessed in the same way. However, no rows were removed from the test set during preprocessing as this would skew the results. We also made sure to fit the TF-IDF vectorizers on the training set only, to avoid data leakage.
@@ -382,11 +380,11 @@ SVM and logistic regression exhibit similar performance for several reasons. The
 The advanced modelling technique we have chosen are Word2Vec embeddings coupled with a Random Forest classifier. 
 
 ### Word2Vec
-Word2vec is a technique for natural language processing from 2013. The word2vec algorithm uses a shallow neural network model to learn word associations from a large corpus of text. Once trained, it can detect synonymous words or suggest additional words for a partial sentence. In the same way as tf-idf (our current approach), word2vec represents each document with a vector. The vectors are chosen such that they capture the semantic and syntactic qualities of the words.
+Word2vec is a technique for natural language processing from 2013. The word2vec algorithm uses a shallow neural network model to learn word associations from a large corpus of text. Once trained, it can detect synonymous words or suggest additional words for a partial sentence. In the same way as TF-IDF (our current approach), word2vec represents each document with a vector. The vectors are chosen such that they capture the semantic and syntactic qualities of the words.
 
 We will use the library `gensim` to train a Word2Vec model on a large corpus of text. Then, we will use the pre-trained model to generate embeddings for each tweet in our dataset. The embeddings will be used as features in our Random Forest classifier.
 
-There exists many similar models to Word2Vec, such as Glove, FastText, Universal Sentence Encoder and BERT by Google. We chose Word2Vec because it is simple compared to the alternatives, and it is still a big step up from tf-idf.
+There exists many similar models to Word2Vec, such as Glove, FastText, Universal Sentence Encoder and BERT by Google. We chose Word2Vec because it is simple compared to the alternatives, and it is still a big step up from TF-IDF.
 
 ### Random Forest Classifier
 The Random Forest classifier is an ensemble learning method. It is an ensemble of decision trees, where each tree is trained on a random subset of the training data. The final prediction is made by aggregating the predictions of all the trees. Random Forests are robust to overfitting and can handle high-dimensional data effectively.
@@ -415,7 +413,7 @@ We clean the tweets like the current pipeline.
 
 **Feature extraction using Word2Vec:**
 
-Instead of using tf-idf vectorization, we use Word2Vec to generate word embeddings for each tweet.  We will first pre-trained a Word2Vec model on a large document corpus using the `gensim`-library. Then, we will use the pre-trained model to generate embeddings for each tweet in our dataset.
+Instead of using TF-IDF vectorization, we use Word2Vec to generate word embeddings for each tweet.  We will first pre-trained a Word2Vec model on a large document corpus using the `gensim`-library. Then, we will use the pre-trained model to generate embeddings for each tweet in our dataset.
 
 **Modelling using a Random Forest Classifier:**
 
@@ -427,6 +425,8 @@ Use the trained Random Forest model to classify tweets in the test set. Evaluate
 
 ## 7. Individual contributions
 Henrik Skog: Plotting, preprocessing, feature extraction, modelling, pipeline design, report writing
+
+Max Gunhamn: Report writing, proofreading.
 
 ...
 
