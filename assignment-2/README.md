@@ -65,7 +65,7 @@ df['has_url'] = df['text'].apply(lambda x: 1 if 'http' in str(x) else 0)
 
 When using TF-IDF on the raw text, you loose all the semantic meaning of how the words are used in the text. For example, the sentence "I love you" and "You love I" would have the same TF-IDF representation, even though the meaning of the sentences are different. However, if you add trigrams to the text, we can capture them as two distinct features. This is because the trigrams "I love you" and "You love I" are different.
 
-Currently we extract all bigrams and trigrams from the text, concat them using _, and then just concat the result to the text. We then use TF-IDF on the new text. We use the `max_features` parameter to limit the number of features to 1000.
+Currently we extract all bigrams and trigrams from the text, concatinate them using _, then append the result to the rest of the text. TF-IDF is then used on the result, using the `max_features` parameter to limit the number of features to the top 1000 most significant unigrams, bigrams and trigram.
 
 ```py
 from nltk.util import ngrams
