@@ -12,23 +12,25 @@ Furthermore, we cleaned the `text` column. The first part of this included remov
 
 Finally, we lemmatized the text. Lemmatization is the process of reducing words to their base or dictionary form, considering their context and meaning. For example, "running" becomes "run" and "better" becomes "good."
 
+However, there seems to be an issue with the code we wrote, as the cleaned text does not convert verbs to their base form.
+
 Moreover, we removed duplicated rows with regards to the `text` column, as outlined in assignment 1.
 
 When handling categorical data, we removeds rows with a `choose_one` value of `Can't decide`, according to what was outlined in assignment 1. Next, we mapped the `choose_one` values `Relevant` and `Not Relevant` to `1` and `0`, respectively. This was stored in a new feature, called `target`.
 
 **NOTE:**
-For the test set, we did not remove any rows to not skew the results. However, the `choose_one` still needs to be mapped to a binary value such that the models predictions and the test set can be compared. In this delivery, we have mapped all the rows with 'cant decide' to 0. This is obvoiusly not ideal, as it may lead to metrics that are not representative of the model's performance. Another solution we considered was to remove the rows with 'cant decide' from the test set, from the perspective that wrong labling is out of the scope of the project. However, we went with the first alternative.
+For the test set, we did not remove any rows to not skew the results. However, the `choose_one` still needs to be mapped to a binary value such that the models predictions and the test set can be compared. In this delivery, we have mapped all the rows with 'cant decide' to 0. This is obvoiusly not ideal, as it may lead to metrics that are not representative of the model's performance. Another solution we considered was to remove the rows with 'cant decide' from the test set, from the perspective that wrong labeling is out of the scope of the project. However, we went with the first alternative.
 
-## 2. Extract features
-We have done feature extraction from two raw columns in the dataset: 'text' and 'keyword'. Here we will outline how the feature were extracted.
+## 2. Extract features 
+We have done feature extraction from two raw columns in the dataset: 'text' and 'keyword'. Here we will outline how the features were extracted.
 
 ### The text column
 Machine learning models are not able to understand raw text, so the text must be converted into a numerical representation. The following methods were used to extract features from the text
 
 #### TF-IDF
-TD-IDF, or term frequency–inverse document frequency, is an extenstion of the bag-of-words model. The bag-of-words algorithm represents a document by the occurrence of words within a it. You first build a vocabulary by looking at the set of all words used in the corpus. The amount of words in the vocabulary maps directly to the number of features it produces for a given document. The result of embedding a document with bag-of-words is simply a one hot encoding of the ocurrences of the words in the vocabulary in the document.
+TF-IDF, or term frequency–inverse document frequency, is an extenstion of the bag-of-words model. The bag-of-words algorithm represents a document by the occurrence of words within a it. You first build a vocabulary by looking at the set of all words used in the corpus. The amount of words in the vocabulary maps directly to the number of features it produces for a given document. The result of embedding a document with bag-of-words is simply a one hot encoding of the ocurrences of the words in the vocabulary in the document.
 
-TF-IDF extends the bag-of-words model by also including how important a word is in the context of the entire corpus. The importance of a word increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus. This means that words that appear frequently in a single document but not in many documents throughout the corpus will get a high score. On the other hand, common words that appear frequently in many documents (like "and", "the", etc.) will get a low score. This normalization process ensures that less emphasis is placed on common words that do not carry much meaningful information.
+TF-IDF extends the bag-of-words model by also including how important a word is in the context of the entire corpus. The importance of a word increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus. This means that words that appear frequently in a single document, but not in many documents throughout the corpus will get a high score. On the other hand, common words that appear frequently in many documents (like "and", "the", etc.) will get a low score. This normalization process ensures that less emphasis is placed on common words that do not carry much meaningful information.
 
 The implementation is done using the `TfidfVectorizer` from `sklearn.feature_extraction.text`. The `TfidfVectorizer` converts a collection of raw documents to a matrix of TF-IDF features. The `TfidfVectorizer` is equivalent to using `CountVectorizer` followed by `TfidfTransformer`. Using the `TfidfVectorizer` is more efficient and requires less code.
 
@@ -36,7 +38,7 @@ However, by converting the text into a numerical representation, we lose a lot o
 
 #### Text length
 
-TF-IDF does not capture the length of a given document. A hypotheses might be that disaster-related tweets are longer than non-disaster related tweets. We extract the length of the text in characters and use it as a feature.
+TF-IDF does not capture the length of a given document. A hypothesis might be that disaster-related tweets are longer than non-disaster related tweets. We extract the length of the text in characters and use it as a feature.
 
 #### Counting hashtags
 
@@ -71,7 +73,7 @@ df['has_url'] = df['text'].apply(lambda x: 1 if 'http' in str(x) else 0)
 
 When using TF-IDF on the raw text, you loose all the semantic meaning of how the words are used in the text. For example, the sentence "I love you" and "You love I" would have the same TF-IDF representation, even though the meaning of the sentences are different. However, if you add trigrams to the text, we can capture them as two distinct features. This is because the trigrams "I love you" and "You love I" are different.
 
-Currently we extract all bigrams and trigrams from the text, concatinate them using _, then append the result to the rest of the text. TF-IDF is then used on the result, using the `max_features` parameter to limit the number of features to the top 1000 most significant unigrams, bigrams and trigram.
+Currently we extract all bigrams and trigrams from the text, concatenate them using _, then append the result to the rest of the text. TF-IDF is then used on the result, using the `max_features` parameter to limit the number of features to the top 1000 most significant unigrams, bigrams and trigrams.
 
 
 Result for bigrams:
@@ -94,7 +96,7 @@ Most common trigrams in non-disaster tweets:
 [(('liked', 'youtube', 'video'), 32), (('i', 'am', 'going'), 18), (('pick', 'fan', 'army'), 18), (('cross', 'body', 'bag'), 17), (('reddits', 'new', 'content'), 11), (('new', 'content', 'policy'), 11), (('low', 'selfimage', 'take'), 10), (('selfimage', 'take', 'quiz'), 10), (('deluged', 'invoice', 'make'), 10), (('likely', 'rise', 'top'), 10)]
 ```
 
-As you can see in the results, there is a bug in the code where the text the ngrams are extracted from  is not lemmatized. This is not good for performance and is something we should look into.
+
 
 #### Sentiment analysis
 
@@ -114,7 +116,7 @@ df_test['sentiment'] = df_test['text'].apply(analyze_sentiment_vader)
 
 The keyword feature is important because it is the word from the text that may have the strongest correlation to the target. To extract features from it, we encode it using the same TF-IDF method. This way, the model can fit to these features if it sees a strong correlation between the keyword and the target.
 
-Another way we could have "extracted features features" from this could be by just appending the keyword 1 or x times to the text, thereby increasing the weight of the keyword in the text. This might be a good idea, but we have not tried it.
+Another way we could have "extracted features" from this could be by just appending the keyword 1 or x times to the text, thereby increasing the weight of the keyword in the text. We chose not to do it this way, as we wanted the keywords to have a more significant impact than just adding them to the text. 
 
 ## 3. Select features
 
@@ -131,23 +133,23 @@ These are the extracted feature that, in addition to the raw features, can be se
 | extracted features from keyword column        | The extracted features from the keyword column   | Yes      |
 
 
-**text_length**
-![Alt text](image-4.png)
-The distribution of the text-length is fairly similar for both disaster and non-disaster tweets. The difference may be significant, but it is not very large. Thus, we decided not to use this feature in our model.
+**text_length**  
+![Alt text](image-4.png)  
+The distribution of the text-length is fairly similar for both disaster and non-disaster tweets. The difference may be significant, but it is not very large. Thus, we decided not to use this feature in our model.  
 
-**hashtag_count**
-![Alt text](image-3.png)
-The hashtag count also has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
+**hashtag_count**  
+![Alt text](image-3.png)    
+The hashtag count also has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.  
 
-**mention_count**
-![Alt text](image-2.png)
-The mention count has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
+**mention_count**  
+![Alt text](image-2.png)  
+The mention count has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.  
 
-**has_url**
-![Alt text](image-1.png)
-The url count has quite a large difference between disaster and non-disaster tweets. We can see that the majority of disaster-related tweets contain a url, whilst the majority of non-disaster tweets do not contain a url. This is of course not enough to conclude that the tweet is disaster-related, but it might be a useful feature.
+**has_url**  
+![Alt text](image-1.png)  
+The url count has quite a large difference between disaster and non-disaster tweets. We can see that the majority of disaster-related tweets contain a url, whilst the majority of non-disaster tweets do not contain a url. This is of course not enough to conclude that the tweet is disaster-related, but it might be a useful feature.  
 
-**sentiment**
+**sentiment**  
 We computed the t-statistic and p-value by performing an independent two-sample t-test on the sentiment scores of tweets categorized as disaster-related and non-disaster-related tweets. The sentiment scores were calculated using VADER sentiment analysis, where higher values denote more positive sentiment and lower values denote more negative sentiment. The t-statistic indicates the magnitude and direction of the difference in mean sentiment scores between the two groups, while the p-value quantifies the evidence against the hypothesis that the groups have the same mean sentiment.
 
 The results of the t-test was -21.96539979122823:
@@ -155,17 +157,17 @@ The t-statistic measures the size of the difference relative to the variation in
 
 Since it's negative, this indicates that the mean sentiment score of the disaster_group is lower than the mean sentiment score of the not_disaster_group.
 
-The p-value was 3.52 x 10^-102. An extremely small number in this context. In general terms, a p-value near 0 suggests that the observed data is very unlikely under the null hypothesis. The null hypothesis for this t-test is that the mean sentiment scores of the disaster and non-disaster tweets are the same.
+The p-value was 3.52 x 10^-102. An extremely small number in this context. In general terms, a p-value near 0 suggests that the observed data is extremely unlikely under the null hypothesis. The null hypothesis for this t-test is that the mean sentiment scores of the disaster and non-disaster tweets are the same.
 
 This provides strong evidence against the null hypothesis, and leads us to conclude that there is a statistically significant difference in sentiment scores between disaster tweets and non-disaster tweets.
 The negative t-statistic suggests that, on average, disaster tweets have lower sentiment scores compared to non-disaster tweets, which makes sense given the nature of the tweets. 
 
-From this we can conclude that the sentiment feature is useful, so we use it in our model.
+From this we conclude that the sentiment feature is useful, and therefore use it in our model.
 
-**extracted of features from text + ngrams**
+**extracted features from text + ngrams**  
 The n-grams contains semantic infomation about the text which would otherwise be lost when using TF-IDF. From eye-balling the result in part "2. Extract features - N-grams" we can see a distinct difference in the results of the disaster-related and non-disaster-related top n-grams. Based on this, we choose to use the n-grams as features in our model.
 
-**extracted features from keyword column**
+**extracted features from keyword column**  
 We include the keyword column in our analysis since it is the word from the text that may have the strongest correlation to the target. 
 
 ## 4. Modelling
@@ -173,7 +175,7 @@ When evaluating the performance of our models, we want to ensure that they are b
 
 We trained the models on the training set using 5-fold cross-validation. The reason for using cross-validation is to ensure that the model is evaluated on different subsets of the training data. This helps reduce the risk of overfitting. The reason for using 5 folds is that it is a good balance between computational cost and accuracy. We then used the trained model to predict the labels for the test set. This way we ensure that the model is evaluated on unseen data, giving us a better idea of how well it would perform in the real world.  However, it should still be said that the test set is not a perfect representation of the real world. The test set is still a subset of the same dataset, and the data is not collected in real-time. This means that the test set is not a perfect representation of the real world. 
 
-To tune our models we use grid search. Grid search is a technique for finding the optimal combination of hyperparameters for a given model. The reason for using grid search is that it is a simple and effective way of testing which parameters make the model perform the best. The downside of grid search is that it is computationally expensive. However, since we are only tuning a few hyperparameters, the computational cost is not too high.
+To tune our models, we use grid search. Grid search is a technique for finding the optimal combination of hyperparameters for a given model. The reason for using grid search is that it is a simple and effective way of testing which parameters make the model perform the best. The downside of grid search is that it is computationally expensive. However, since we are only tuning a few hyperparameters, the computational cost is not too high.
 
 ## 4.1 Logistic regression
 ### 4.1.1 About the model
@@ -217,7 +219,7 @@ _Confusion Matrix for Testing:_
 | Actual \ Predicted | Predicted 0 | Predicted 1 |
 |--------------------|-------------|-------------|
 | Actual 0           | 3393        | 202         |
-| Actual 1           | 371         | 1929         |
+| Actual 1           | 371         | 1929        |
 
 #### 4.1.3.2 Results after hyperparameter tuning
 
@@ -302,8 +304,11 @@ random_state: Controls the pseudo-random number generation for shuffling the dat
 Overall Train Accuracy: 0.8538
 
 Confusion Matrix for Training:  
-[[3265, 330],  
-[532, 1768]]
+| Actual \ Predicted | Predicted 0 | Predicted 1 |
+|--------------------|-------------|-------------|
+| Actual 0           | 3265        | 330         |
+| Actual 1           | 532         | 1768        |  
+
 
 **Test result**
 
@@ -321,7 +326,7 @@ Confusion Matrix for Testing:
 | Actual 1           | 283         | 674         |
 
 #### Results after hyperparameter tuning
-The linear kernal is much quicker at training than the radial basis function. Performing grid search with it takes a long time and is not something we got to do for this assignment.
+The linear kernel is much quicker at training than the radial basis function. Performing grid search with it takes a long time and is not something we had time and/or computational resources to do in time for this assignment.
 
 Using grid search we found that from the values 0.001, 0.01 of C, 0.001 was better and got this result:
 
@@ -335,8 +340,11 @@ Using grid search we found that from the values 0.001, 0.01 of C, 0.001 was bett
 Overall Train Accuracy: 0.6098
 
 Confusion Matrix for Training:  
-[[3595, 0],  
-[2300, 0]]
+| Actual \ Predicted | Predicted 0 | Predicted 1 |
+|--------------------|-------------|-------------|
+| Actual 0           | 3595        | 0           |
+| Actual 1           | 2300        | 0           |  
+
 
 **Test result**
 
@@ -353,8 +361,9 @@ Confusion Matrix for Testing:
 | Actual 0           | 1219        | 0           |
 | Actual 1           | 957         | 0           |
 
-### 4.3 Interpreting the results
-> TODO: vi burde serriøst skrive noe om hva vi tenker om resultatene. Gir de mening, er det gode resultater, osv osv
+As you can see, these results are very bad. The model just predicts 0 for everything. If we had more time, we would have ensured that the grid search could complete to give us better values for hyperparameters. We could do this by utilizing gpu cluster services such as Lambda Labs or Google Cloud.  
+
+
 
 ## 5. Comparing modelling methods
 
@@ -362,7 +371,7 @@ Confusion Matrix for Testing:
 
 Chosen metrics: Accuracy and F1-score
   
-Accuracy is used as a general metric to determine how precise our model was.  We chose to look at f1-scores as f1-scores incorporates both precision and recall. 
+Accuracy is used as a general metric to determine how precise our model was.  We also chose to look at F1-scores as F1-scores incorporates both precision and recall, which are both of importance to us. 
 
 ### 5.2. Why they perform similar
 
@@ -421,19 +430,24 @@ Henrik Skog: Plotting, preprocessing, feature extraction, modelling, pipeline de
 
 Max Gunhamn: Report writing, proofreading.
 
+Haakon Tideman Kanter: Feature extraction, report writing, modelling, proofreading, comparing modelling methods, report writing
+
+Sebastian Sole: Pipeline design, report writing
+
+Magnus Rødseth: Modelling, preprocessing, report writing
+
+Mattis Czternasty Hembre: Report writing, proofreading
+
+
 ...
 
 ## 8. Personalized feedback form
 
-1. Feature extraction: (YES/NO)
-2. Feature selection: (YES/NO)
-3. Choice of basic modelling methods: (YES/NO)
-4. Choice of performance metrics: (YES/NO)
-5. Comparison of modelling methods: (YES/NO)
-6. Advanced Pipeline Design: (YES/NO)
+1. Feature extraction: (YES)
+2. Feature selection: (YES)
+3. Choice of basic modelling methods: (NO)
+4. Choice of performance metrics: (NO)
+5. Comparison of modelling methods: (YES)
+6. Advanced Pipeline Design: (YES)
 
-### 8.1. Other questions
 
-> TODO: Add other quesions if they arise
-
-## 9
