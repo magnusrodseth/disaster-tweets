@@ -130,24 +130,34 @@ These are the extracted feature that, in addition to the raw features, can be se
 | extracted of features from text + ngrams        | The extracted features from the text column (including n-grams)   | Yes      |
 | extracted features from keyword column        | The extracted features from the keyword column   | Yes      |
 
+### Justification for feature selection
 
-**text_length**
-![Alt text](image-4.png)
+### text_length
+
+![Alt text](image-4.png "Caption for Image 4")
+
 The distribution of the text-length is fairly similar for both disaster and non-disaster tweets. The difference may be significant, but it is not very large. Thus, we decided not to use this feature in our model.
 
-**hashtag_count**
-![Alt text](image-3.png)
+### hashtag_count
+
+![Alt text](image-3.png "Caption for Image 3")
+
 The hashtag count also has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
 
 **mention_count**
+
 ![Alt text](image-2.png)
+
 The mention count has a similar distribution for both disaster and non-disaster tweets. The difference is not very large, so we decided not to use this feature.
 
 **has_url**
+
 ![Alt text](image-1.png)
+
 The url count has quite a large difference between disaster and non-disaster tweets. We can see that the majority of disaster-related tweets contain a url, whilst the majority of non-disaster tweets do not contain a url. This is of course not enough to conclude that the tweet is disaster-related, but it might be a useful feature.
 
 **sentiment**
+
 We computed the t-statistic and p-value by performing an independent two-sample t-test on the sentiment scores of tweets categorized as disaster-related and non-disaster-related tweets. The sentiment scores were calculated using VADER sentiment analysis, where higher values denote more positive sentiment and lower values denote more negative sentiment. The t-statistic indicates the magnitude and direction of the difference in mean sentiment scores between the two groups, while the p-value quantifies the evidence against the hypothesis that the groups have the same mean sentiment.
 
 The results of the t-test was -21.96539979122823:
@@ -163,9 +173,11 @@ The negative t-statistic suggests that, on average, disaster tweets have lower s
 From this we can conclude that the sentiment feature is useful, so we use it in our model.
 
 **extracted of features from text + ngrams**
+
 The n-grams contains semantic infomation about the text which would otherwise be lost when using TF-IDF. From eye-balling the result in part "2. Extract features - N-grams" we can see a distinct difference in the results of the disaster-related and non-disaster-related top n-grams. Based on this, we choose to use the n-grams as features in our model.
 
 **extracted features from keyword column**
+
 We include the keyword column in our analysis since it is the word from the text that may have the strongest correlation to the target. 
 
 ## 4. Modelling
@@ -192,10 +204,7 @@ These are the hyperparameters we tuned for logistic regression:
 
 - `C`: Varying levels of regularization (default = 1.0)
 
-### 4.1.3 Modelling results
-
-
-#### Stock model with default params
+### 4.1.3 Results without hyperparameter tuning
 
 **Validation result (5-fold cross-validation):**
 
@@ -223,7 +232,7 @@ _Confusion Matrix for Testing:_
 | Actual 0           | 3393        | 202         |
 | Actual 1           | 371         | 1929         |
 
-#### Results after hyperparameter tuning
+### 4.1.4 Results after hyperparameter tuning
 
 We got the best results with the following hyperparameters:
 
@@ -296,7 +305,8 @@ The second basic modelling method used was a support vector machine (SVM). SVM w
 random_state: Controls the pseudo-random number generation for shuffling the data for probability estimation.
 
 
-#### Stock model (no tuning)
+### 4.2.3 Results without hyperparameter tuning
+
 **Validation result (5-fold cross-validation):**
 
 | Label | Precision | Recall | F1-Score | Support |
@@ -305,10 +315,6 @@ random_state: Controls the pseudo-random number generation for shuffling the dat
 | 1     | 0.84      | 0.77   | 0.80     | 2300    |
 
 Overall Train Accuracy: 0.8538
-
-Confusion Matrix for Training:  
-[[3265, 330],  
-[532, 1768]]
 
 **Test result**
 
@@ -326,7 +332,7 @@ _Confusion Matrix for test:_
 | Actual 0           | 1065        | 154         |
 | Actual 1           | 283         | 674         |
 
-#### Results after hyperparameter tuning
+#### 4.2.4 Results after hyperparameter tuning
 The linear kernal is much quicker at training than the radial basis function. Performing grid search with it takes a long time and is not something we got to do for this assignment.
 
 Using grid search we found that from the values 0.001, 0.01 of C, 0.001 was better and got this result:
