@@ -54,4 +54,4 @@ Note that all PDF files are gitignored, so you they will not be added to version
 
 ## Developer Information
 
-Developed by Haakon Tideman Kanter, Henrik Skog, Mattis Hembre, Max Gunhamn, Sebastian Sole, and [Magnus Rødseth](https://github.com/magnusrodseth).
+Developed by Haakon Tideman Kanter, [Henrik Skog](https://github.com/henrikskog), Mattis Hembre, Max Gunhamn, Sebastian Sole, and [Magnus Rødseth](https://github.com/magnusrodseth).
