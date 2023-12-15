@@ -1,5 +1,13 @@
 # Data Driven Software
 
+## Description
+
+This repository contains the code for the project in the course IT3212 - Data Driven Software at NTNU.
+
+The rapid spread of information on social media platforms like Twitter is revolutionizing how we learn about emergencies and disasters. However, the sheer volume of data makes manual monitoring impractical. Hence, developing an automated system to filter and verify posts about genuine disaster events could be invaluable for different emergency services. This could enable faster responses to crises and help medical facilities prepare for possible surges in patient numbers, allowing for more efficient resource management in urgent situations.
+
+**Based on this problem to solve, our task is to classify whether a tweet is related to a disaster or not.**
+
 ## Running the code
 
 ### Prerequisites for running the code
