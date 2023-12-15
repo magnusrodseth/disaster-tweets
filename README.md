@@ -8,6 +8,7 @@ The rapid spread of information on social media platforms like Twitter is revolu
 
 **Based on this problem to solve, our task is to classify whether a tweet is related to a disaster or not.**
 
+
 ## Running the code
 
 ### Prerequisites for running the code
